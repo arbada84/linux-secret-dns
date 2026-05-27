@@ -1,0 +1,41 @@
+## dnscrypt-proxy 설정 - Linux SecretDNS 프로젝트
+## DoH (DNS over HTTPS) 전용 설정
+
+# systemd socket activation 사용 (127.0.2.1:53)
+listen_addresses = []
+
+# 사용할 DoH 서버
+server_names = ['cloudflare', 'cloudflare-ipv6', 'google', 'quad9-doh-ip4-port443-filter-ecs-pri']
+
+ipv6_servers = true
+require_nolog = true
+
+lb_strategy = 'p2'
+
+cache = true
+cache_size = 4096
+cache_min_ttl = 2400
+cache_max_ttl = 86400
+cache_neg_min_ttl = 60
+cache_neg_max_ttl = 600
+
+[query_log]
+  file   = '/var/log/dnscrypt-proxy/query.log'
+  format = 'tsv'
+
+[nx_log]
+  file   = '/var/log/dnscrypt-proxy/nx.log'
+  format = 'tsv'
+
+[sources]
+  [sources.'public-resolvers']
+  url = 'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md'
+  cache_file = '/var/cache/dnscrypt-proxy/public-resolvers.md'
+  minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+  refresh_delay = 72
+
+  [sources.'relays']
+  url = 'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md'
+  cache_file = '/var/cache/dnscrypt-proxy/relays.md'
+  minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+  refresh_delay = 72
