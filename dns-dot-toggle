@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+# DNS over TLS 켜기/끄기 토글
+# 사용법: dns-dot-toggle [on|off|status]
+
+export LANG=ko_KR.UTF-8
+export DISPLAY="${DISPLAY:-:0}"
+
+CONF_DIR="/etc/systemd/resolved.conf.d"
+CONF_FILE="${CONF_DIR}/10-dot.conf"
+CONF_DISABLED="${CONF_DIR}/10-dot.conf.disabled"
+
+# ── 상태 확인 ──────────────────────────────────────────────────
+is_enabled() {
+    [ -f "$CONF_FILE" ] && grep -q "DNSOverTLS=yes" "$CONF_FILE" 2>/dev/null
+}
+
+show_status() {
+    echo ""
+    if is_enabled; then
+        echo "  상태: 🟢 켜짐 (DNS over TLS 활성)"
+        echo ""
+        echo "  현재 DNS 서버:"
+        echo "    - Cloudflare : 1.1.1.1 / 1.0.0.1 (암호화)"
+        echo "    - Quad9      : 9.9.9.9 (암호화)"
+        echo "    - Fallback   : 8.8.8.8 Google (암호화)"
+        echo ""
+        echo "  → 모든 DNS 쿼리가 암호화되어 전송됩니다"
+        echo "    ISP(통신사)에 방문 도메인이 노출되지 않습니다"
+    else
+        echo "  상태: 🔴 꺼짐 (일반 DNS 사용 중)"
+        echo ""
+        echo "  현재 DNS 서버: 공유기/ISP 기본값 (192.168.219.1)"
+        echo ""
+        echo "  → DNS 쿼리가 암호화되지 않습니다"
+        echo "    통신사에 방문 도메인이 노출될 수 있습니다"
+    fi
+    echo ""
+    resolvectl status 2>/dev/null \
+        | grep -E "Current DNS|DNSOverTLS|Protocols" \
+        | sed 's/^/  /'
+    echo ""
+}
+
+# ── 활성화 ────────────────────────────────────────────────────
+do_enable() {
+    if is_enabled; then
+        echo "이미 켜져 있습니다."
+        return 0
+    fi
+
+    # disabled 파일이 있으면 복원, 없으면 새로 생성
+    if [ -f "$CONF_DISABLED" ]; then
+        mv "$CONF_DISABLED" "$CONF_FILE"
+    else
+        cat > "$CONF_FILE" << 'EOF'
+[Resolve]
+DNS=1.1.1.1#cloudflare-dns.com 1.0.0.1#cloudflare-dns.com 9.9.9.9#dns.quad9.net 149.112.112.112#dns.quad9.net
+FallbackDNS=8.8.8.8#dns.google 8.8.4.4#dns.google
+Domains=~.
+DNSOverTLS=yes
+DNSSEC=no
+EOF
+    fi
+
+    systemctl restart systemd-resolved
+    echo "✅ DNS over TLS 켜짐"
+    echo "   Cloudflare(1.1.1.1) + Quad9(9.9.9.9) 암호화 DNS 사용 중"
+    notify-send -i network-vpn "DNS over TLS" "🟢 켜짐 - Cloudflare 암호화 DNS 사용 중" 2>/dev/null || true
+}
+
+# ── 비활성화 ──────────────────────────────────────────────────
+do_disable() {
+    if ! is_enabled; then
+        echo "이미 꺼져 있습니다."
+        return 0
+    fi
+
+    mv "$CONF_FILE" "$CONF_DISABLED"
+    systemctl restart systemd-resolved
+    echo "🔴 DNS over TLS 꺼짐"
+    echo "   공유기/ISP 기본 DNS 사용 중"
+    notify-send -i network "DNS over TLS" "🔴 꺼짐 - 기본 ISP DNS 사용 중" 2>/dev/null || true
+}
+
+# ── 인증 래퍼 (sudo 또는 pkexec) ─────────────────────────────
+run_as_root() {
+    local action="$1"
+    if [ "$EUID" -eq 0 ]; then
+        "$action"
+    elif command -v pkexec &>/dev/null && [ -n "$DISPLAY" ]; then
+        pkexec bash -c "$(declare -f is_enabled do_enable do_disable); CONF_FILE='$CONF_FILE'; CONF_DISABLED='$CONF_DISABLED'; $action"
+    else
+        sudo bash -c "$(declare -f is_enabled do_enable do_disable); CONF_FILE='$CONF_FILE'; CONF_DISABLED='$CONF_DISABLED'; $action"
+    fi
+}
+
+# ── 메인 ──────────────────────────────────────────────────────
+case "${1:-status}" in
+    on|enable|켜기)
+        echo "=== DNS over TLS 켜기 ==="
+        run_as_root do_enable
+        echo ""
+        show_status
+        ;;
+    off|disable|끄기)
+        echo "=== DNS over TLS 끄기 ==="
+        run_as_root do_disable
+        echo ""
+        show_status
+        ;;
+    toggle)
+        if is_enabled; then
+            echo "=== DNS over TLS 끄기 ==="
+            run_as_root do_disable
+        else
+            echo "=== DNS over TLS 켜기 ==="
+            run_as_root do_enable
+        fi
+        echo ""
+        show_status
+        ;;
+    status|상태|*)
+        echo "=== DNS over TLS 상태 ==="
+        show_status
+        ;;
+esac

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=DNS 보안 설정 (DoT)
+GenericName=DNS over TLS 토글
+Comment=DNS over TLS 켜기/끄기 및 상태 확인
+Exec=xfce4-terminal --title="DNS 보안 설정" --command="bash -c '/home/arbada/bin/dns-dot-toggle; read -p \"엔터를 누르면 닫힙니다...\"'"
+Icon=network-vpn
+Terminal=false
+Categories=Network;Settings;Security;
+Keywords=DNS;DoT;TLS;보안;암호화;프라이버시;
