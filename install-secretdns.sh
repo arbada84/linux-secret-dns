@@ -63,13 +63,24 @@ sudo systemctl start tpws
 echo "      → 서비스 등록 및 시작 완료"
 
 # 5. 토글 스크립트 설치
-echo "[5/6] 통합 토글 스크립트 설치..."
+echo "[5/7] 통합 토글 스크립트 설치..."
 cp "$REPO_DIR/secretdns" "$BIN_DIR/secretdns"
 chmod +x "$BIN_DIR/secretdns"
+sed "s|/home/arbada|$HOME|g" "$REPO_DIR/secretdns-toggle-notify" \
+    > "$BIN_DIR/secretdns-toggle-notify"
+chmod +x "$BIN_DIR/secretdns-toggle-notify"
 echo "      → $BIN_DIR/secretdns"
+echo "      → $BIN_DIR/secretdns-toggle-notify"
 
-# 6. 시작 메뉴 등록
-echo "[6/6] 시작 메뉴 등록..."
+# 6. 비밀번호 없이 실행 권한 등록
+echo "[6/7] sudoers 등록 (비밀번호 없이 토글)..."
+SUDOERS_LINE="$(whoami) ALL=(root) NOPASSWD: $BIN_DIR/secretdns"
+echo "$SUDOERS_LINE" | sudo tee /etc/sudoers.d/secretdns > /dev/null
+sudo chmod 440 /etc/sudoers.d/secretdns
+echo "      → /etc/sudoers.d/secretdns"
+
+# 7. 시작 메뉴 등록
+echo "[7/7] 시작 메뉴 등록..."
 sed "s|/home/arbada|$HOME|g" "$REPO_DIR/desktop/secretdns.desktop" \
     > "$APPLICATIONS_DIR/secretdns.desktop"
 update-desktop-database "$APPLICATIONS_DIR" 2>/dev/null || true
