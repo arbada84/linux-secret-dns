@@ -10,3 +10,5 @@ twitter.com
 x.com
 twitch.tv
 netflix.com
+dmm.co.jp
+pics.dmm.co.jp
