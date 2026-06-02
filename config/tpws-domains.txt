@@ -1,14 +1,56 @@
 # SNI 파편화 적용 도메인 목록
 # 이 목록의 도메인에만 SNI 파편화가 적용됩니다
 # (빈 파일이면 모든 트래픽에 적용)
+
+# === 동영상 스트리밍 ===
 youtube.com
 www.youtube.com
 googlevideo.com
 ytimg.com
 youtu.be
-twitter.com
-x.com
 twitch.tv
 netflix.com
+
+# === SNS ===
+twitter.com
+x.com
+
+# === DMM ===
 dmm.co.jp
+www.dmm.co.jp
 pics.dmm.co.jp
+cc3001.dmm.co.jp
+p.dmm.co.jp
+
+# === JAV 정보 ===
+javlibrary.com
+www.javlibrary.com
+javbus.com
+www.javbus.com
+jav.guru
+r18.com
+www.r18.com
+mgstage.com
+www.mgstage.com
+avdbs.com
+www.avdbs.com
+
+# === JAV 스트리밍 ===
+missav.com
+www.missav.com
+missav.ws
+javhd.com
+www.javhd.com
+
+# === 일본 성인 제작사 ===
+heyzo.com
+www.heyzo.com
+tokyohot.com
+www.tokyohot.com
+fc2.com
+video.fc2.com
+
+# === 토렌트 ===
+nyaa.si
+sukebei.nyaa.si
+rutracker.org

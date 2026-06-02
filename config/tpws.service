@@ -4,14 +4,19 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStartPre=/sbin/iptables -t nat -A OUTPUT -p tcp --dport 443 -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
-ExecStartPre=/sbin/iptables -t nat -A OUTPUT -p tcp --dport 80  -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
-ExecStopPost=/sbin/iptables -t nat -D OUTPUT -p tcp --dport 443 -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
-ExecStopPost=/sbin/iptables -t nat -D OUTPUT -p tcp --dport 80  -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
+ExecStartPre=/sbin/iptables  -t nat -A OUTPUT -p tcp --dport 443 -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
+ExecStartPre=/sbin/iptables  -t nat -A OUTPUT -p tcp --dport 80  -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
+ExecStartPre=/sbin/ip6tables -t nat -A OUTPUT -p tcp --dport 443 -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
+ExecStartPre=/sbin/ip6tables -t nat -A OUTPUT -p tcp --dport 80  -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
+ExecStopPost=/sbin/iptables  -t nat -D OUTPUT -p tcp --dport 443 -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
+ExecStopPost=/sbin/iptables  -t nat -D OUTPUT -p tcp --dport 80  -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
+ExecStopPost=/sbin/ip6tables -t nat -D OUTPUT -p tcp --dport 443 -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
+ExecStopPost=/sbin/ip6tables -t nat -D OUTPUT -p tcp --dport 80  -m owner ! --uid-owner tpws -j REDIRECT --to-ports 988
 ExecStart=/usr/local/bin/tpws \
   --port=988 \
   --user=tpws \
   --bind-addr=127.0.0.1 \
+  --bind-addr=::1 \
   --split-pos=1 \
   --disorder \
   --hostlist=/etc/zapret/tpws-domains.txt
