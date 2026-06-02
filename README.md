@@ -1,4 +1,16 @@
-# Linux SecretDNS
+# Linux Mint 유틸리티 모음
+
+> Linux Mint 환경에서 직접 구현한 유틸리티 스크립트 모음입니다.
+
+| 유틸리티 | 폴더 | 설명 |
+|----------|------|------|
+| SecretDNS | `/` | DoH + SNI 파편화로 ISP 감청 차단 |
+| Transmission 필터 | `transmission/` | 토렌트 광고/스팸 파일 자동 제외 및 삭제 |
+| Celluloid 플레이리스트 | `celluloid/` | 폴더 추가 시 자막 파일 자동 제거 |
+
+---
+
+# SecretDNS
 
 > 길호넷 시크릿DNS 동등 기능을 Linux Mint에서 네이티브로 구현  
 > ISP의 DNS 감청과 DPI 기반 사이트 감지를 동시에 차단합니다.
@@ -253,3 +265,92 @@ sudo iptables -t nat -L OUTPUT | grep REDIRECT
 ---
 
 *Linux Mint + systemd-resolved + NetworkManager 환경 기준*
+
+---
+
+# Transmission 필터
+
+> 토렌트 추가 시 광고·스팸 파일을 자동으로 제외하고, 다운로드 완료 후 잔여 파일을 삭제합니다.
+
+## 파일
+
+| 파일 | 역할 |
+|------|------|
+| `transmission/transmission-filter-unwanted-files.py` | 토렌트 추가 시 제외 파일 표시 |
+| `transmission/transmission-cleanup-unwanted-files.py` | 다운로드 완료 후 제외 파일 삭제 |
+
+## 제외 조건
+
+`transmission-filter-unwanted-files.py`의 `should_skip()` 함수 기준:
+
+- 파일 경로에 `996gg.cc` 포함 (광고 영상)
+- `.url` 확장자 (광고 링크 파일)
+- 파일명이 `offkab@sukebei.txt`
+
+## 설치
+
+```bash
+# 스크립트 설치
+cp transmission/transmission-filter-unwanted-files.py ~/.local/bin/
+cp transmission/transmission-cleanup-unwanted-files.py ~/.local/bin/
+chmod +x ~/.local/bin/transmission-filter-unwanted-files.py
+chmod +x ~/.local/bin/transmission-cleanup-unwanted-files.py
+```
+
+Transmission 설정 → 편집 → **토렌트 추가 시 스크립트 실행** 에 `transmission-filter-unwanted-files.py` 등록  
+**다운로드 완료 시 스크립트 실행** 에 `transmission-cleanup-unwanted-files.py` 등록
+
+또는 RPC로 등록:
+
+```bash
+SESSION=$(curl -s -X POST http://127.0.0.1:9091/transmission/rpc 2>&1 | grep -o 'X-Transmission-Session-Id: [^<]*' | cut -d' ' -f2)
+curl -s -X POST http://127.0.0.1:9091/transmission/rpc \
+  -H "Content-Type: application/json" \
+  -H "X-Transmission-Session-Id: $SESSION" \
+  -d '{
+    "method": "session-set",
+    "arguments": {
+      "script-torrent-added-enabled": true,
+      "script-torrent-added-filename": "/home/사용자명/.local/bin/transmission-filter-unwanted-files.py",
+      "script-torrent-done-enabled": true,
+      "script-torrent-done-filename": "/home/사용자명/.local/bin/transmission-cleanup-unwanted-files.py"
+    }
+  }'
+```
+
+## 동작 원리
+
+비트토렌트는 피스(조각) 단위로 다운로드하므로, 제외 표시만으로는 피스 경계에 걸친 파일이 부분적으로 생성됩니다.  
+`transmission-cleanup-unwanted-files.py`가 다운로드 완료 후 이 잔여 파일을 자동 삭제합니다.
+
+로그 확인:
+```bash
+tail -f ~/.config/transmission/filter-unwanted-files.log
+```
+
+---
+
+# Celluloid 플레이리스트 자막 필터
+
+> 폴더를 플레이리스트에 추가할 때 자막 파일(.srt, .ass 등)이 영상과 함께 섞여 들어가는 문제를 해결합니다.
+
+## 파일
+
+| 파일 | 역할 |
+|------|------|
+| `celluloid/filter-subtitles-from-playlist.lua` | 플레이리스트에서 자막 파일 자동 제거 |
+
+## 설치
+
+```bash
+mkdir -p ~/.config/celluloid/scripts
+cp celluloid/filter-subtitles-from-playlist.lua ~/.config/celluloid/scripts/
+```
+
+Celluloid 재시작 후 적용됩니다.
+
+## 제거되는 자막 확장자
+
+`.srt` `.ass` `.ssa` `.sub` `.vtt` `.smi` `.idx` `.sup` `.lrc`
+
+> 자막 파일은 플레이리스트에서만 제거되며, 영상 재생 시 자동으로 불러와집니다.
