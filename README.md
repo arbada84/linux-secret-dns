@@ -7,6 +7,7 @@
 | SecretDNS | `/` | DoH + SNI 파편화로 ISP 감청 차단 |
 | Transmission 필터 | `transmission/` | 토렌트 광고/스팸 파일 자동 제외 및 삭제 |
 | Celluloid 플레이리스트 | `celluloid/` | 폴더 추가 시 자막 파일 자동 제거 |
+| SSH·원격 데스크톱 | 이 문서 하단 | OpenSSH, XRDP, Remmina 및 화면 없는 운영 설정 |
 
 ---
 
@@ -354,3 +355,126 @@ Celluloid 재시작 후 적용됩니다.
 `.srt` `.ass` `.ssa` `.sub` `.vtt` `.smi` `.idx` `.sup` `.lrc`
 
 > 자막 파일은 플레이리스트에서만 제거되며, 영상 재생 시 자동으로 불러와집니다.
+
+
+# SSH·원격 데스크톱 설정
+
+Linux Mint 22.3 Cinnamon 기준. 설정 확인일: 2026-11-14.
+원격 접속 관련 도구 3종(OpenSSH, XRDP, Remmina)의 설치 방법과 실제 적용 상태를 기록합니다.
+
+| 도구 | 용도 | 현재 PC 적용 상태 |
+|------|------|------------------|
+| OpenSSH Server | 터미널 및 SFTP 파일 접속 | 설치, 실행, 부팅 시 자동 시작 확인 |
+| XRDP + xorgxrdp | 가상 화면으로 원격 데스크톱 접속 | 설치, 실행, 자동 시작 및 가상 X 화면 확인. 다른 PC의 로그인은 미검증 |
+| Remmina + RDP 플러그인 | 접속하는 Linux Mint PC의 RDP 클라이언트 | 설치 방법 안내만 완료. 현재 PC에는 미설치 |
+
+## 1. OpenSSH Server
+
+접속을 받는 민트 PC에서 설치하고 자동 시작합니다.
+
+```bash
+sudo apt install openssh-server
+sudo systemctl enable --now ssh
+systemctl is-active ssh
+systemctl is-enabled ssh
+```
+
+접속하는 PC에서 실행합니다. 아래 주소와 계정은 실제 서버 값으로 바꿉니다.
+
+```bash
+ssh 사용자명@서버IP
+```
+
+파일 관리자의 주소창에는 `sftp://사용자명@서버IP/`를 입력할 수 있습니다.
+SSH 기본 포트는 TCP 22이며, 현재 서버의 포트 대기 상태를 확인했습니다.
+
+### 화면 없이 부팅하고 절전 방지
+
+현재 서버는 다음 설정이 적용되어 있습니다.
+
+```bash
+# 다음 부팅부터 로컬 로그인 화면 없이 서비스 위주로 실행
+sudo systemctl set-default multi-user.target
+
+# 자동 절전 및 최대절전 방지
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+```
+
+`/etc/systemd/logind.conf.d/60-headless.conf`:
+
+```ini
+[Login]
+HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+IdleAction=ignore
+```
+
+변경 후 logind 설정은 다음 부팅 때 반영할 수 있습니다.
+현재 기본 부팅 대상은 `multi-user.target`이며 위 절전 대상 4개가 masked 상태입니다.
+로컬 그래픽 로그인 자동 시작을 복원하려면 `sudo systemctl set-default graphical.target`을 실행합니다.
+
+## 2. XRDP + xorgxrdp
+
+접속을 받는 민트 PC에서 설치합니다.
+
+```bash
+sudo apt install xrdp xorgxrdp
+sudo systemctl enable --now xrdp xrdp-sesman
+```
+
+그래픽카드 없이 사용할 원격 세션은 Cinnamon 소프트웨어 렌더링 모드로 설정했습니다.
+기존 `~/.xsession`이 있다면 먼저 백업한 뒤 아래 내용을 적용합니다.
+
+```sh
+#!/bin/sh
+unset DBUS_SESSION_BUS_ADDRESS
+unset SESSION_MANAGER
+export LIBGL_ALWAYS_SOFTWARE=1
+exec /usr/bin/cinnamon-session-cinnamon2d
+```
+
+```bash
+chmod 700 ~/.xsession
+```
+
+이 파일은 XRDP 로그인 시 사용자 X 세션을 시작하며, 다른 X 세션 로그인에도 영향을 줄 수 있습니다.
+XRDP와 xrdp-sesman의 실행·자동 시작 및 TCP 3389 대기를 확인했습니다.
+xorgxrdp 가상 X 화면 생성은 확인했으나, 시험 당시 그래픽카드는 장착되어 있었습니다.
+그래픽카드를 제거한 실제 부팅과 다른 PC에서의 전체 데스크톱 로그인은 별도 확인이 필요합니다.
+카드 없이 메인보드가 부팅 가능한지는 하드웨어에 따라 다릅니다.
+
+### 남은 인증서 권한 설정
+
+현재 `xrdp` 계정은 `ssl-cert` 그룹에 들어 있지 않습니다.
+기본 TLS 개인 키를 읽을 수 있도록 다음 명령을 실행해야 합니다. 이 단계는 아직 적용하지 않았습니다.
+
+```bash
+sudo adduser xrdp ssl-cert
+sudo systemctl restart xrdp
+```
+
+Windows에서는 “원격 데스크톱 연결”에 서버 IP를 입력하고,
+XRDP 로그인 화면에서 `Xorg`를 선택한 뒤 민트 계정과 비밀번호로 로그인합니다.
+
+## 3. Remmina: Linux Mint에서 원격 데스크톱 접속
+
+접속하는 민트 PC에 설치합니다. 이 명령은 안내만 했으며 현재 서버에서는 실행하지 않았습니다.
+
+```bash
+sudo apt install remmina remmina-plugin-rdp
+```
+
+Remmina에서 새 연결을 만들고 다음 값을 입력합니다.
+
+| 항목 | 값 |
+|------|----|
+| 프로토콜 | RDP |
+| 서버 | 서버IP:3389 |
+| 사용자 이름 | 접속을 받는 민트 PC의 계정 |
+| 비밀번호 | 해당 계정의 로그인 비밀번호 |
+| XRDP 로그인 세션 | Xorg |
+
+이 기록은 같은 공유기의 내부망 접속을 기준으로 합니다.
+외부 접속용 VPN이나 공유기 포트 전달은 구성하지 않았습니다.
+비밀번호, 개인 키, 인증 토큰은 저장소에 기록하지 않습니다.
