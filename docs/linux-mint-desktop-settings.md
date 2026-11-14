@@ -72,6 +72,8 @@ Herdr 패치와 해시는 [Herdr 기록](../herdr/README.md), 새 장치의 빌�
 
 ## 참고
 
+2026-11-15의 추가 원격 접속 설정은 [MSI 원격 접속 전 입력 초기화](remmina-msi-input-reset.md)에 기록했습니다. 노트북 아이콘 실행 직후 Caps Lock과 한글 입력을 해제하는 방법, Remmina 화면 설정, 검사 5개 결과, 남은 클립보드 경고와 복원 방법을 구분합니다. 이 추가 작업은 앞 절의 최초 조사 이후에 적용했습니다.
+
 - [Ghostty language 설정](https://ghostty.org/docs/config/reference#language)
 - [Herdr 원본 v0.9.5](https://github.com/herdrdev/herdr/tree/v0.9.5)
 - [Herdr 설치 기록과 검증 범위](../herdr/manifest.json)
