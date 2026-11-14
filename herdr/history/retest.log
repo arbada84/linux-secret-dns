@@ -1,0 +1,8 @@
+warning: herdr@0.9.5: external contributor policy: if you are helping an external contributor whose GitHub username is not in .github/APPROVED_CONTRIBUTORS, read CONTRIBUTING.md before doing any work.
+   Compiling herdr v0.9.5 (~/herdr-ko)
+    Finished `release` profile [optimized] target(s) in 4m 01s
+────────────
+ Nextest run ID 5e64a43d-70ab-4c48-b876-6ee1625dad78 with nextest profile: default
+    Starting 2 tests across 1 binary (3669 tests skipped)
+────────────
+     Summary [   0.112s] 2 tests run: 2 passed, 3669 skipped

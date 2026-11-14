@@ -1,0 +1,41 @@
+{
+  "kind": "unofficial local Korean UI patch",
+  "observed_on": "2026-11-15",
+  "original_install_date": "2026-11-06",
+  "upstream": "https://github.com/herdrdev/herdr/tree/v0.9.5",
+  "source_commit": "2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01",
+  "base_version": "0.9.5",
+  "patch": "herdr-0.9.5-ko.patch",
+  "patch_sha256": "4af372ee77d5f652e9690b153680c5cf2219113eb5b705710a04e1a17d572e14",
+  "changed_files": 31,
+  "license": "Apache-2.0",
+  "rust": "1.96.1",
+  "zig": "0.16.0",
+  "installed_binary_sha256": "7658b00ceabdbff3991edb7a2fd6ff3dbf834c3c829e80d4cee359fc8d1bd25d",
+  "original_binary_sha256": "14d9e8bc8b4a9e0118d77c32266f76d461f09b40342eb23752960bd89f59929d",
+  "protocol": 22,
+  "endpoint_generation": 1,
+  "validation": {
+    "current_binary_matches_install_manifest": true,
+    "current_patch_matches_working_tree_diff": true,
+    "current_client_server_compatible": true,
+    "ghostty_config_valid": true,
+    "historical_full_suite": {
+      "passed": 3657,
+      "failed": 2,
+      "skipped": 12
+    },
+    "historical_focused_retest": {
+      "passed": 2,
+      "failed": 0
+    },
+    "final_full_suite_rerun": false,
+    "new_machine_build_run": false,
+    "patch_applies_to_clean_pinned_source": true,
+    "patched_files_match_installed_source_count": 31
+  },
+  "limitations": [
+    "CLI help and some server messages remain English",
+    "Official updates can replace this local Korean build"
+  ]
+}

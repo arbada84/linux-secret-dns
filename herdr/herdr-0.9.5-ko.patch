@@ -1,0 +1,2920 @@
+diff --git a/src/client/shell/agent_sidebar.rs b/src/client/shell/agent_sidebar.rs
+index e43ab8c..125e8c7 100644
+--- a/src/client/shell/agent_sidebar.rs
++++ b/src/client/shell/agent_sidebar.rs
+@@ -8,6 +8,7 @@ use ratatui::{
+     widgets::{Paragraph, Widget},
+ };
+ 
++use super::render::put_text;
+ use super::*;
+ 
+ pub(super) struct AgentRow {
+@@ -75,7 +76,7 @@ pub(super) fn render_agent_panel(
+         snapshot
+             .agent_view_label
+             .as_ref()
+-            .map(|_| " no matching agents"),
++            .map(|_| " 일치하는 에이전트가 없습니다"),
+         config,
+         agent_scroll,
+         hits,
+@@ -113,14 +114,14 @@ pub(super) fn render_agent_panel_header(
+         area.x,
+         area.y + 1,
+         area.width,
+-        " agents",
++        " 에이전트",
+         Style::default()
+             .fg(config.palette.overlay0)
+             .add_modifier(Modifier::BOLD),
+     );
+     let sort_label = agent_view_label.unwrap_or(match config.agent_panel_sort {
+-        crate::config::AgentPanelSortConfig::Spaces => "grouped",
+-        crate::config::AgentPanelSortConfig::Priority => "priority",
++        crate::config::AgentPanelSortConfig::Spaces => "작업공간순",
++        crate::config::AgentPanelSortConfig::Priority => "우선순위순",
+     });
+     let sort_width = display_width(sort_label).min(area.width as usize) as u16;
+     let sort_rect = Rect::new(
+@@ -373,24 +374,16 @@ pub(super) fn render_agent_row(
+     }
+ }
+ 
+-fn put_text(buffer: &mut Buffer, x: u16, y: u16, width: u16, text: &str, style: Style) {
+-    for (offset, character) in text.chars().take(width as usize).enumerate() {
+-        if let Some(cell) = buffer.cell_mut((x + offset as u16, y)) {
+-            cell.set_char(character).set_style(style);
+-        }
+-    }
+-}
+-
+ fn display_width(text: &str) -> usize {
+     unicode_width::UnicodeWidthStr::width(text)
+ }
+ 
+-fn sidebar_status_text(status: crate::api::schema::AgentStatus) -> &'static str {
++pub(super) fn sidebar_status_text(status: crate::api::schema::AgentStatus) -> &'static str {
+     use crate::api::schema::AgentStatus;
+     match status {
+-        AgentStatus::Blocked => "blocked",
+-        AgentStatus::Done => "done",
+-        AgentStatus::Working => "working",
+-        AgentStatus::Idle | AgentStatus::Unknown => "idle",
++        AgentStatus::Blocked => "응답 필요",
++        AgentStatus::Done => "완료",
++        AgentStatus::Working => "작업 중",
++        AgentStatus::Idle | AgentStatus::Unknown => "대기",
+     }
+ }
+diff --git a/src/client/shell/context_menu.rs b/src/client/shell/context_menu.rs
+index a7d6322..7eb0da4 100644
+--- a/src/client/shell/context_menu.rs
++++ b/src/client/shell/context_menu.rs
+@@ -7,25 +7,28 @@ impl ClientContextMenuOverlay {
+         let item = |label, action| ClientContextMenuItem { label, action };
+         match &self.target {
+             ClientContextMenuTarget::Workspace { is_git: false, .. } => {
+-                vec![item("Rename", Action::Rename), item("Close", Action::Close)]
++                vec![
++                    item("이름 변경", Action::Rename),
++                    item("닫기", Action::Close),
++                ]
+             }
+             ClientContextMenuTarget::Workspace {
+                 is_linked_worktree: false,
+                 has_worktree_children: false,
+                 ..
+             } => vec![
+-                item("Rename", Action::Rename),
+-                item("Close", Action::Close),
+-                item("New worktree", Action::NewWorktree),
+-                item("Open worktree...", Action::OpenWorktree),
++                item("이름 변경", Action::Rename),
++                item("닫기", Action::Close),
++                item("새 워크트리", Action::NewWorktree),
++                item("워크트리 열기...", Action::OpenWorktree),
+             ],
+             ClientContextMenuTarget::Workspace {
+                 is_linked_worktree: true,
+                 ..
+             } => vec![
+-                item("Rename", Action::Rename),
+-                item("Close", Action::Close),
+-                item("Delete worktree checkout...", Action::RemoveWorktree),
++                item("이름 변경", Action::Rename),
++                item("닫기", Action::Close),
++                item("워크트리 폴더 삭제...", Action::RemoveWorktree),
+             ],
+             ClientContextMenuTarget::Workspace {
+                 has_worktree_children: true,
+@@ -33,22 +36,26 @@ impl ClientContextMenuOverlay {
+                 collapsed,
+                 ..
+             } => vec![
+-                item("Rename", Action::Rename),
++                item("이름 변경", Action::Rename),
+                 item(
+-                    if *close_group { "Close group" } else { "Close" },
++                    if *close_group {
++                        "그룹 닫기"
++                    } else {
++                        "닫기"
++                    },
+                     Action::Close,
+                 ),
+-                item("New worktree", Action::NewWorktree),
+-                item("Open worktree...", Action::OpenWorktree),
++                item("새 워크트리", Action::NewWorktree),
++                item("워크트리 열기...", Action::OpenWorktree),
+                 item(
+-                    if *collapsed { "Expand" } else { "Collapse" },
++                    if *collapsed { "펼치기" } else { "접기" },
+                     Action::ToggleGroup,
+                 ),
+             ],
+             ClientContextMenuTarget::Tab { .. } => vec![
+-                item("New tab", Action::NewTab),
+-                item("Rename", Action::Rename),
+-                item("Close", Action::Close),
++                item("새 탭", Action::NewTab),
++                item("이름 변경", Action::Rename),
++                item("닫기", Action::Close),
+             ],
+             ClientContextMenuTarget::Pane {
+                 source_pane_id,
+@@ -56,26 +63,26 @@ impl ClientContextMenuOverlay {
+                 right_click_passthrough,
+                 ..
+             } => {
+-                let mut items = vec![item("Rename pane", Action::RenamePane)];
++                let mut items = vec![item("창 이름 변경", Action::RenamePane)];
+                 if *has_manual_label {
+-                    items.push(item("Clear pane name", Action::ClearPaneName));
++                    items.push(item("창 이름 지우기", Action::ClearPaneName));
+                 }
+                 if source_pane_id.is_some() {
+-                    items.push(item("Swap with focused pane", Action::SwapWithFocusedPane));
++                    items.push(item("선택한 창과 맞바꾸기", Action::SwapWithFocusedPane));
+                 }
+                 items.extend([
+-                    item("Split right", Action::SplitRight),
+-                    item("Split down", Action::SplitDown),
+-                    item("Zoom", Action::Zoom),
++                    item("오른쪽으로 분할", Action::SplitRight),
++                    item("아래로 분할", Action::SplitDown),
++                    item("확대", Action::Zoom),
+                     item(
+                         if *right_click_passthrough {
+-                            "Use Herdr right-click menu"
++                            "Herdr 우클릭 메뉴 사용"
+                         } else {
+-                            "Send right-clicks to pane"
++                            "창으로 우클릭 전달"
+                         },
+                         Action::ToggleRightClickPassthrough,
+                     ),
+-                    item("Close pane", Action::ClosePane),
++                    item("창 닫기", Action::ClosePane),
+                 ]);
+                 items
+             }
+@@ -242,7 +249,7 @@ impl ClientShellState {
+                     .map(|workspace| workspace.label.clone());
+                 if let Some(label) = label {
+                     self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-                        title: "rename workspace",
++                        title: "작업공간 이름 변경",
+                         input: TextEditor::new(&label, false),
+                         target: ClientRenameTarget::Workspace { workspace_id },
+                     }));
+@@ -311,7 +318,7 @@ impl ClientShellState {
+                         + 1)
+                     .to_string();
+                     self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-                        title: "new tab",
++                        title: "새 탭",
+                         input: TextEditor::new(&default_name, true),
+                         target: ClientRenameTarget::NewTab {
+                             workspace_id,
+@@ -338,7 +345,7 @@ impl ClientShellState {
+                     .and_then(|snapshot| snapshot.tabs.iter().find(|tab| tab.tab_id == tab_id));
+                 if let Some(tab) = tab {
+                     self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-                        title: "rename tab",
++                        title: "탭 이름 변경",
+                         input: TextEditor::new(&tab.label, false),
+                         target: ClientRenameTarget::Tab {
+                             tab_id,
+@@ -379,7 +386,7 @@ impl ClientShellState {
+                         .and_then(|pane| pane.label.clone())
+                 });
+                 self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-                    title: "rename pane",
++                    title: "창 이름 변경",
+                     input: TextEditor::new(label.as_deref().unwrap_or_default(), label.is_none()),
+                     target: ClientRenameTarget::Pane { pane_id },
+                 }));
+diff --git a/src/client/shell/endpoint_sidebar.rs b/src/client/shell/endpoint_sidebar.rs
+index 9698248..5366155 100644
+--- a/src/client/shell/endpoint_sidebar.rs
++++ b/src/client/shell/endpoint_sidebar.rs
+@@ -258,7 +258,7 @@ pub(super) fn render_expanded(
+         workspace_area.x,
+         workspace_area.y,
+         workspace_area.width,
+-        " machines",
++        " 컴퓨터",
+         Style::default()
+             .fg(palette.overlay0)
+             .add_modifier(Modifier::BOLD),
+@@ -518,7 +518,7 @@ pub(super) fn render_expanded(
+ 
+     let footer_y = workspace_area.bottom().saturating_sub(1);
+     if config.mouse_capture {
+-        let label = format!(" new · {}", active_endpoint_label(state));
++        let label = format!(" 새로 · {}", active_endpoint_label(state));
+         hits.new_workspace = Rect::new(
+             workspace_area.x,
+             footer_y,
+@@ -545,7 +545,7 @@ pub(super) fn render_expanded(
+             buffer,
+             workspace_area,
+             footer_y,
+-            if attention { "● menu" } else { "menu" },
++            if attention { "● 메뉴" } else { "메뉴" },
+             Style::default().fg(if attention {
+                 palette.accent
+             } else {
+@@ -606,9 +606,9 @@ fn render_endpoint_row(
+         state
+     };
+     let signal = if auth.required_for(endpoint) {
+-        "! auth".to_owned()
++        "! 인증".to_owned()
+     } else if endpoint.status == ClientEndpointStatus::Attention {
+-        "! error".to_owned()
++        "! 오류".to_owned()
+     } else if endpoint.endpoint_id.is_local() {
+         String::new()
+     } else if state.is_empty() {
+diff --git a/src/client/shell/endpoints.rs b/src/client/shell/endpoints.rs
+index 9e71d00..e2ed225 100644
+--- a/src/client/shell/endpoints.rs
++++ b/src/client/shell/endpoints.rs
+@@ -721,11 +721,11 @@ pub(super) fn endpoint_status_presentation(
+     palette: &Palette,
+ ) -> (&'static str, &'static str, ratatui::style::Color) {
+     match status {
+-        ClientEndpointStatus::Connecting => ("◐", "connecting", palette.yellow),
+-        ClientEndpointStatus::Online => ("●", "online", palette.green),
+-        ClientEndpointStatus::Reconnecting => ("◐", "reconnecting", palette.yellow),
+-        ClientEndpointStatus::Attention => ("!", "attention", palette.red),
+-        ClientEndpointStatus::Disabled => ("·", "disabled", palette.overlay0),
++        ClientEndpointStatus::Connecting => ("◐", "연결 중", palette.yellow),
++        ClientEndpointStatus::Online => ("●", "연결됨", palette.green),
++        ClientEndpointStatus::Reconnecting => ("◐", "다시 연결 중", palette.yellow),
++        ClientEndpointStatus::Attention => ("!", "확인 필요", palette.red),
++        ClientEndpointStatus::Disabled => ("·", "비활성", palette.overlay0),
+     }
+ }
+ 
+diff --git a/src/client/shell/global_menu.rs b/src/client/shell/global_menu.rs
+index e5bd6f7..8c15cdc 100644
+--- a/src/client/shell/global_menu.rs
++++ b/src/client/shell/global_menu.rs
+@@ -24,30 +24,30 @@ pub(super) fn global_menu_items(
+ ) -> Vec<(&'static str, ClientGlobalMenuAction)> {
+     let mut items = vec![
+         (
+-            "settings",
++            "설정",
+             ClientGlobalMenuAction::Binding(crate::input::KeybindAction::Settings),
+         ),
+         (
+-            "keybinds",
++            "단축키",
+             ClientGlobalMenuAction::Binding(crate::input::KeybindAction::Help),
+         ),
+         (
+-            "reload config",
++            "설정 다시 읽기",
+             ClientGlobalMenuAction::Binding(crate::input::KeybindAction::ReloadConfig),
+         ),
+     ];
+     if snapshot.update_available.is_some() || snapshot.latest_release_notes_available {
+         items.push((
+             if snapshot.update_available.is_some() {
+-                "update ready"
++                "업데이트 준비됨"
+             } else {
+-                "what's new"
++                "새 소식"
+             },
+             ClientGlobalMenuAction::WhatsNew,
+         ));
+     }
+     items.push((
+-        "detach",
++        "연결 해제",
+         ClientGlobalMenuAction::Binding(crate::input::KeybindAction::Detach),
+     ));
+     items
+diff --git a/src/client/shell/mobile.rs b/src/client/shell/mobile.rs
+index f4ae0af..89ec903 100644
+--- a/src/client/shell/mobile.rs
++++ b/src/client/shell/mobile.rs
+@@ -94,7 +94,7 @@ fn render_header_status(
+             area.x,
+             area.y,
+             area.width,
+-            " no workspace",
++            " 작업공간 없음",
+             Style::default().fg(palette.text).bg(palette.panel_bg),
+         );
+         return;
+@@ -168,7 +168,7 @@ fn render_header_button(
+         );
+     }
+     let label_y = if area.height > 1 { area.y + 1 } else { area.y };
+-    let label = "switch";
++    let label = "전환";
+     let label_width = display_width(label);
+     put_text(
+         buffer,
+@@ -204,11 +204,11 @@ fn render_header_button(
+ 
+ fn mobile_endpoint_state(status: ClientEndpointStatus) -> &'static str {
+     match status {
+-        ClientEndpointStatus::Connecting => "connecting",
+-        ClientEndpointStatus::Online => "online",
+-        ClientEndpointStatus::Reconnecting => "reconnecting",
+-        ClientEndpointStatus::Attention => "attention",
+-        ClientEndpointStatus::Disabled => "disabled",
++        ClientEndpointStatus::Connecting => "연결 중",
++        ClientEndpointStatus::Online => "연결됨",
++        ClientEndpointStatus::Reconnecting => "다시 연결 중",
++        ClientEndpointStatus::Attention => "확인 필요",
++        ClientEndpointStatus::Disabled => "비활성",
+     }
+ }
+ 
+@@ -227,9 +227,9 @@ fn compact_tab_status(snapshot: &ClientShellSnapshot, workspace: &ClientShellWor
+         .map(|tab| tab.label.as_str())
+         .unwrap_or("1");
+     if tabs.len() <= 1 {
+-        format!("tab {label}")
++        format!("탭 {label}")
+     } else {
+-        format!("tab {label} · {}/{}", active + 1, tabs.len())
++        format!("탭 {label} · {}/{}", active + 1, tabs.len())
+     }
+ }
+ 
+@@ -241,10 +241,10 @@ fn render_agent_summary(
+ ) {
+     use crate::api::schema::AgentStatus;
+     let counts = [
+-        (AgentStatus::Blocked, "blocked"),
+-        (AgentStatus::Done, "done"),
+-        (AgentStatus::Working, "working"),
+-        (AgentStatus::Idle, "idle"),
++        (AgentStatus::Blocked, "응답 필요"),
++        (AgentStatus::Done, "완료"),
++        (AgentStatus::Working, "작업 중"),
++        (AgentStatus::Idle, "대기"),
+     ]
+     .map(|(status, label)| {
+         (
+@@ -265,7 +265,7 @@ fn render_agent_summary(
+             area.x,
+             area.y,
+             area.width,
+-            " no agents",
++            " 에이전트 없음",
+             Style::default()
+                 .fg(config.palette.overlay1)
+                 .bg(config.palette.panel_bg),
+@@ -278,7 +278,7 @@ fn render_agent_summary(
+             area.x,
+             area.y,
+             area.width,
+-            " all idle",
++            " 모두 대기 중",
+             Style::default()
+                 .fg(config.palette.overlay1)
+                 .bg(config.palette.panel_bg),
+@@ -407,7 +407,7 @@ pub(super) fn render_mobile_switcher(
+         area.x,
+         area.y,
+         close.x.saturating_sub(area.x),
+-        " switch",
++        " 전환",
+         Style::default()
+             .fg(palette.text)
+             .bg(palette.panel_bg)
+@@ -541,7 +541,7 @@ fn render_close_button(buffer: &mut Buffer, area: Rect, palette: &Palette) {
+                 .bg(palette.surface0),
+         );
+     }
+-    let label_width = 5;
++    let label_width = display_width("닫기");
+     let label_x = area
+         .x
+         .saturating_add(1)
+@@ -551,7 +551,7 @@ fn render_close_button(buffer: &mut Buffer, area: Rect, palette: &Palette) {
+         label_x,
+         area.y,
+         area.width.saturating_sub(1),
+-        "close",
++        "닫기",
+         Style::default()
+             .fg(palette.overlay1)
+             .bg(palette.surface0)
+@@ -583,7 +583,7 @@ fn mobile_items(
+     let palette = &config.palette;
+     let mut items = Vec::new();
+     if endpoints.len() > 1 {
+-        items.push(MobileItem::section("machines", palette));
++        items.push(MobileItem::section("컴퓨터", palette));
+         for endpoint in endpoints {
+             let background = palette.panel_bg;
+             let (symbol, state, color) = endpoint_status_presentation(endpoint.status, palette);
+@@ -618,13 +618,13 @@ fn mobile_items(
+     let agent_view_label = snapshot.agent_view_label.as_deref();
+     if !agents.is_empty() || agent_view_label.is_some() {
+         let title = agent_view_label
+-            .map(|label| format!("agents · {label}"))
+-            .unwrap_or_else(|| "agents".to_owned());
++            .map(|label| format!("에이전트 · {label}"))
++            .unwrap_or_else(|| "에이전트".to_owned());
+         items.push(MobileItem::section(title, palette));
+         if agents.is_empty() {
+             items.push(MobileItem {
+                 lines: vec![Line::from(Span::styled(
+-                    "  no matching agents",
++                    "  일치하는 에이전트가 없습니다",
+                     Style::default()
+                         .fg(palette.overlay0)
+                         .bg(palette.panel_bg)
+@@ -675,7 +675,7 @@ fn mobile_items(
+                     .map(|(_, label)| label.clone())
+                     .unwrap_or_else(|| {
+                         if agent.agent_status == crate::api::schema::AgentStatus::Unknown {
+-                            "idle".to_owned()
++                            "대기".to_owned()
+                         } else {
+                             status_key.to_owned()
+                         }
+@@ -747,9 +747,9 @@ fn mobile_items(
+         }
+     }
+ 
+-    items.push(MobileItem::section("spaces", palette));
++    items.push(MobileItem::section("작업공간", palette));
+     items.push(MobileItem::action(
+-        "  + new workspace",
++        "  + 새 작업공간",
+         ClientMobileTarget::NewWorkspace,
+         palette,
+     ));
+@@ -880,9 +880,9 @@ fn mobile_items(
+     }
+ 
+     if let Some(workspace_id) = snapshot.focused_workspace_id.as_deref() {
+-        items.push(MobileItem::section("tabs", palette));
++        items.push(MobileItem::section("탭", palette));
+         items.push(MobileItem::action(
+-            "  + new tab",
++            "  + 새 탭",
+             ClientMobileTarget::NewTab,
+             palette,
+         ));
+@@ -900,7 +900,7 @@ fn mobile_items(
+             let label = if tab.custom_label {
+                 format!("{} · {}", index + 1, tab.label)
+             } else {
+-                format!("tab {}", tab.label)
++                format!("탭 {}", tab.label)
+             };
+             let label = format!(
+                 "  {}",
+@@ -923,7 +923,7 @@ fn mobile_items(
+         }
+     }
+ 
+-    items.push(MobileItem::section("menu", palette));
++    items.push(MobileItem::section("메뉴", palette));
+     for (index, (label, _)) in super::global_menu::global_menu_items(snapshot)
+         .into_iter()
+         .enumerate()
+diff --git a/src/client/shell/notifications.rs b/src/client/shell/notifications.rs
+index b8437ea..6a13e68 100644
+--- a/src/client/shell/notifications.rs
++++ b/src/client/shell/notifications.rs
+@@ -76,14 +76,14 @@ pub(super) fn render_mobile_notification_banner(
+         SemanticNotificationKind::NeedsAttention => event
+             .title
+             .strip_suffix(" needs attention")
+-            .map(|agent| format!("{agent} waiting"))
++            .map(|agent| format!("{agent} 응답 필요"))
+             .unwrap_or_else(|| event.title.clone()),
+         SemanticNotificationKind::Finished => event
+             .title
+             .strip_suffix(" finished")
+-            .map(|agent| format!("{agent} done"))
++            .map(|agent| format!("{agent} 완료"))
+             .unwrap_or_else(|| event.title.clone()),
+-        SemanticNotificationKind::UpdateInstalled => "update ready".to_owned(),
++        SemanticNotificationKind::UpdateInstalled => "업데이트 준비됨".to_owned(),
+         SemanticNotificationKind::Custom => event.title.clone(),
+     };
+     let dot_color = match event.kind {
+@@ -247,7 +247,7 @@ mod tests {
+             .iter()
+             .map(|cell| cell.symbol())
+             .collect::<String>();
+-        assert!(text.contains("pi waiting"));
++        assert!(text.replace(' ', "").contains("pi응답필요"));
+         assert!(text.contains("workspace · tab 1"));
+         assert!(buffer.content[18 * 44..19 * 44]
+             .iter()
+diff --git a/src/client/shell/overlay_input.rs b/src/client/shell/overlay_input.rs
+index 7f797ef..ad3e829 100644
+--- a/src/client/shell/overlay_input.rs
++++ b/src/client/shell/overlay_input.rs
+@@ -346,7 +346,7 @@ impl ClientShellState {
+             .map(crate::workspace::derive_label_from_cwd)
+             .unwrap_or_else(|| "workspace".to_owned());
+         self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-            title: "new workspace",
++            title: "새 작업공간",
+             input: TextEditor::new(&suggested_name, true),
+             target: ClientRenameTarget::NewWorkspace {
+                 source_workspace_id,
+@@ -371,7 +371,7 @@ impl ClientShellState {
+             return;
+         };
+         self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-            title: "rename workspace",
++            title: "작업공간 이름 변경",
+             input: TextEditor::new(&workspace.label, false),
+             target: ClientRenameTarget::Workspace { workspace_id },
+         }));
+@@ -392,7 +392,7 @@ impl ClientShellState {
+             + 1)
+         .to_string();
+         self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-            title: "new tab",
++            title: "새 탭",
+             input: TextEditor::new(&default_name, true),
+             target: ClientRenameTarget::NewTab {
+                 workspace_id,
+@@ -412,7 +412,7 @@ impl ClientShellState {
+             return;
+         };
+         self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-            title: "rename tab",
++            title: "탭 이름 변경",
+             input: TextEditor::new(&tab.label, false),
+             target: ClientRenameTarget::Tab {
+                 tab_id: tab.tab_id.clone(),
+@@ -433,7 +433,7 @@ impl ClientShellState {
+             return;
+         };
+         self.overlay = Some(ClientShellOverlay::Rename(ClientRenameOverlay {
+-            title: "rename pane",
++            title: "창 이름 변경",
+             input: TextEditor::new(
+                 pane.label.as_deref().unwrap_or_default(),
+                 pane.label.is_none(),
+@@ -1102,7 +1102,7 @@ impl ClientShellState {
+                 })
+             {
+                 self.receive_endpoint_unavailable(
+-                    "Close target changed; try closing it again".into(),
++                    "닫을 대상이 바뀌었습니다. 다시 시도하세요".into(),
+                 );
+                 return;
+             }
+@@ -1194,12 +1194,12 @@ impl ClientShellState {
+             })
+             .sum::<usize>();
+         let panes = if pane_count == 1 {
+-            "1 pane".to_owned()
++            "창 1개".to_owned()
+         } else {
+-            format!("{pane_count} panes")
++            format!("창 {pane_count}개")
+         };
+         let scope = if closes_group {
+-            format!("{} workspaces, {panes}", group.len())
++            format!("작업공간 {}개, {panes}", group.len())
+         } else {
+             panes
+         };
+@@ -1209,9 +1209,9 @@ impl ClientShellState {
+                 close_group: closes_group,
+                 tab_target,
+                 title: if closes_group {
+-                    "Close worktree group?".to_owned()
++                    "워크트리 그룹을 닫을까요?".to_owned()
+                 } else {
+-                    "Close workspace?".to_owned()
++                    "작업공간을 닫을까요?".to_owned()
+                 },
+                 detail: format!("{} — {scope}", workspace.label),
+             },
+diff --git a/src/client/shell/overlays.rs b/src/client/shell/overlays.rs
+index f26cc6e..2c50d8a 100644
+--- a/src/client/shell/overlays.rs
++++ b/src/client/shell/overlays.rs
+@@ -354,9 +354,9 @@ fn render_release_notes_overlay(
+         subtitle_area.y,
+         subtitle_area.width,
+         if notes.preview {
+-            "update ready"
++            "업데이트 준비됨"
+         } else {
+-            "what's new in this release"
++            "이번 버전의 새 소식"
+         },
+         base.fg(p.overlay1),
+     );
+@@ -369,7 +369,7 @@ fn render_release_notes_overlay(
+     button(
+         b,
+         close,
+-        " esc close ",
++        " esc 닫기 ",
+         Style::default()
+             .fg(contrast(p))
+             .bg(p.accent)
+@@ -398,10 +398,10 @@ fn render_release_notes_overlay(
+ 
+     if let Some(footer_area) = stack.footer {
+         let footer_line = ratatui::text::Line::from(vec![
+-            ratatui::text::Span::styled(" scroll ", base.fg(p.overlay0)),
++            ratatui::text::Span::styled(" 스크롤 ", base.fg(p.overlay0)),
+             ratatui::text::Span::styled("wheel ↑↓", base.fg(p.text)),
+             ratatui::text::Span::styled("  ·  ", base.fg(p.overlay0)),
+-            ratatui::text::Span::styled("close", base.fg(p.overlay0)),
++            ratatui::text::Span::styled("닫기", base.fg(p.overlay0)),
+             ratatui::text::Span::styled(" esc / enter ", base.fg(p.text)),
+         ]);
+         ratatui::widgets::Widget::render(
+@@ -464,9 +464,9 @@ fn render_product_announcement_overlay(
+         base.fg(p.text).add_modifier(Modifier::BOLD),
+     );
+     let subtitle = if announcement.preview {
+-        "product announcement preview"
++        "제품 안내 미리보기"
+     } else {
+-        "product announcement"
++        "제품 안내"
+     };
+     put_text(
+         b,
+@@ -485,7 +485,7 @@ fn render_product_announcement_overlay(
+     button(
+         b,
+         close,
+-        " esc close ",
++        " esc 닫기 ",
+         Style::default()
+             .fg(contrast(p))
+             .bg(p.accent)
+@@ -514,10 +514,10 @@ fn render_product_announcement_overlay(
+ 
+     if let Some(footer_area) = stack.footer {
+         let footer_line = ratatui::text::Line::from(vec![
+-            ratatui::text::Span::styled(" scroll ", base.fg(p.overlay0)),
++            ratatui::text::Span::styled(" 스크롤 ", base.fg(p.overlay0)),
+             ratatui::text::Span::styled("wheel ↑↓", base.fg(p.text)),
+             ratatui::text::Span::styled("  ·  ", base.fg(p.overlay0)),
+-            ratatui::text::Span::styled("close", base.fg(p.overlay0)),
++            ratatui::text::Span::styled("닫기", base.fg(p.overlay0)),
+             ratatui::text::Span::styled(" esc / enter ", base.fg(p.text)),
+         ]);
+         ratatui::widgets::Widget::render(
+@@ -627,7 +627,7 @@ fn render_onboarding_overlay(
+     button(
+         b,
+         primary,
+-        " ↵ continue ",
++        " ↵ 계속 ",
+         Style::default()
+             .fg(contrast(p))
+             .bg(p.accent)
+@@ -674,7 +674,7 @@ fn render_rename_overlay(
+     button(
+         b,
+         *save,
+-        " ↵ save ",
++        " ↵ 저장 ",
+         Style::default()
+             .fg(contrast(p))
+             .bg(p.accent)
+@@ -684,8 +684,8 @@ fn render_rename_overlay(
+         .fg(p.text)
+         .bg(p.surface0)
+         .add_modifier(Modifier::BOLD);
+-    button(b, *clear, " ^c clear ", n);
+-    button(b, *cancel, " esc cancel ", n);
++    button(b, *clear, " ^c 지우기 ", n);
++    button(b, *cancel, " esc 취소 ", n);
+     Some(OverlayRender {
+         area: q,
+         primary: *save,
+@@ -727,7 +727,7 @@ fn render_navigator_overlay(
+         q.x + 2,
+         q.y,
+         q.width.saturating_sub(4),
+-        " Go to ",
++        " 이동 ",
+         Style::default().fg(p.accent).bg(p.panel_bg),
+     );
+     let rows = super::aggregate_navigation::navigator_rows(endpoints, active_endpoint_id, n);
+@@ -737,14 +737,14 @@ fn render_navigator_overlay(
+         format!(
+             " / {}",
+             match f {
+-                ClientNavigatorFilter::Blocked => "blocked",
+-                ClientNavigatorFilter::Working => "working",
+-                ClientNavigatorFilter::Idle => "idle",
+-                ClientNavigatorFilter::Done => "done",
++                ClientNavigatorFilter::Blocked => "응답 필요",
++                ClientNavigatorFilter::Working => "작업 중",
++                ClientNavigatorFilter::Idle => "대기",
++                ClientNavigatorFilter::Done => "완료",
+             }
+         )
+     } else if n.query.is_empty() {
+-        " / search agents and terminals".to_owned()
++        " / 에이전트와 터미널 검색".to_owned()
+     } else {
+         format!(" / {}", n.query)
+     };
+@@ -755,9 +755,9 @@ fn render_navigator_overlay(
+     let count = format!(
+         "{terminal_count} {}",
+         if terminal_count == 1 {
+-            "terminal"
++            "터미널"
+         } else {
+-            "terminals"
++            "터미널"
+         }
+     );
+     put_text(
+@@ -823,7 +823,7 @@ fn render_navigator_overlay(
+             body.x,
+             body.y,
+             body.width,
+-            " No matching agents or terminals",
++            " 일치하는 에이전트나 터미널이 없습니다",
+             Style::default().fg(p.overlay0).bg(p.panel_bg),
+         );
+     }
+@@ -943,7 +943,7 @@ fn render_navigator_overlay(
+                     rect.right() - columns + 1,
+                     rect.y,
+                     11,
+-                    r.agent.as_deref().unwrap_or("terminal"),
++                    r.agent.as_deref().unwrap_or("터미널"),
+                     meta_style,
+                 );
+             }
+@@ -954,7 +954,7 @@ fn render_navigator_overlay(
+                     rect.y,
+                     11,
+                     if r.agent.is_some() {
+-                        status_text(status)
++                        super::super::agent_sidebar::sidebar_status_text(status)
+                     } else {
+                         "shell"
+                     },
+@@ -1027,9 +1027,9 @@ fn render_navigator_overlay(
+         i.bottom() - 1,
+         i.width,
+         if n.search_focused {
+-            " search type · move ↑↓/ctrl+n/p · open enter · back esc"
++            " 입력 검색 · ↑↓/ctrl+n/p 이동 · enter 열기 · esc 뒤로"
+         } else {
+-            " ↑↓/j/k rows · ←→ workspace · / search · a/b/w/i/d filter · enter open · esc close"
++            " ↑↓/j/k 이동 · ←→ 작업공간 · / 검색 · a/b/w/i/d 필터 · enter 열기 · esc 닫기"
+         },
+         Style::default().fg(p.overlay0).bg(p.panel_bg),
+     );
+@@ -1067,9 +1067,9 @@ fn help_lines(
+         .max()
+         .unwrap_or(8);
+     if groups.is_empty() {
+-        let message = " no matching keybinds";
++        let message = " 일치하는 단축키가 없습니다";
+         return vec![(
+-            message.chars().count(),
++            display_width(message) as usize,
+             Line::from(Span::styled(
+                 message,
+                 Style::default().fg(palette.overlay1).bg(palette.panel_bg),
+@@ -1080,7 +1080,7 @@ fn help_lines(
+     let mut lines = Vec::new();
+     for (group, entries) in groups {
+         lines.push((
+-            group.len() + 1,
++            display_width(group) as usize + 1,
+             Line::from(Span::styled(
+                 format!(" {group}"),
+                 Style::default()
+@@ -1091,7 +1091,7 @@ fn help_lines(
+         ));
+         for (key, label) in entries {
+             let padded_key = format!(" {key:<key_width$} ");
+-            let width = padded_key.chars().count() + label.chars().count();
++            let width = display_width(&padded_key) as usize + display_width(&label) as usize;
+             lines.push((
+                 width,
+                 Line::from(vec![
+@@ -1132,7 +1132,7 @@ fn render_help_overlay(
+         i.x,
+         i.y,
+         i.width,
+-        "keybinds",
++        "단축키",
+         Style::default()
+             .fg(p.text)
+             .bg(p.panel_bg)
+@@ -1143,9 +1143,9 @@ fn render_help_overlay(
+         b,
+         close,
+         if h.search_focused {
+-            " esc back "
++            " esc 뒤로 "
+         } else {
+-            " esc close "
++            " esc 닫기 "
+         },
+         Style::default()
+             .fg(contrast(p))
+@@ -1161,7 +1161,7 @@ fn render_help_overlay(
+         &if h.search_focused {
+             " / ".to_owned()
+         } else {
+-            " / press / to filter by command or shortcut".to_owned()
++            " / 명령이나 단축키로 검색하려면 /를 누르세요".to_owned()
+         },
+         Style::default()
+             .fg(if h.search_focused { p.text } else { p.overlay0 })
+@@ -1236,9 +1236,9 @@ fn render_help_overlay(
+         i.bottom() - 1,
+         i.width,
+         if h.search_focused {
+-            " edit ←→/home/end · kill ^u/^k · yank ^y · scroll ↑↓ · back esc"
++            " ←→/home/end 편집 · ^u/^k 삭제 · ^y 붙이기 · ↑↓ 스크롤 · esc 뒤로"
+         } else {
+-            " search / · scroll j/k/↑↓/pgup/pgdn · close esc/enter"
++            " / 검색 · j/k/↑↓/pgup/pgdn 스크롤 · esc/enter 닫기"
+         },
+         Style::default().fg(p.overlay0).bg(p.panel_bg),
+     );
+@@ -1286,7 +1286,7 @@ fn render_confirm_close_overlay(
+     button(
+         b,
+         *ok,
+-        " ↵ confirm ",
++        " ↵ 확인 ",
+         Style::default()
+             .fg(contrast(p))
+             .bg(p.red)
+@@ -1295,7 +1295,7 @@ fn render_confirm_close_overlay(
+     button(
+         b,
+         *cancel,
+-        " esc cancel ",
++        " esc 취소 ",
+         Style::default()
+             .fg(p.text)
+             .bg(p.surface0)
+diff --git a/src/client/shell/render.rs b/src/client/shell/render.rs
+index 248216c..2590369 100644
+--- a/src/client/shell/render.rs
++++ b/src/client/shell/render.rs
+@@ -72,53 +72,53 @@ pub(super) fn render_mode_bar(
+     let prefix_rhs = |bindings: &crate::config::ActionKeybinds| {
+         bindings
+             .prefix_rhs_label()
+-            .unwrap_or_else(|| "unset".to_owned())
++            .unwrap_or_else(|| "미지정".to_owned())
+     };
+ 
+     let mut segments = Vec::<(String, Style)>::new();
+     if let Some(error) = endpoint_error {
+         segments.extend([
+-            (" ERROR ".to_owned(), mode_style),
++            (" 오류 ".to_owned(), mode_style),
+             (format!(" {error}"), base),
+         ]);
+     } else {
+         match mode {
+             ClientShellMode::Prefix => {
+                 segments.extend([
+-                    (" PREFIX ".to_owned(), mode_style),
++                    (" 접두키 ".to_owned(), mode_style),
+                     (" ".to_owned(), base),
+                     ("esc".to_owned(), key),
+-                    (" cancel  ".to_owned(), base),
++                    (" 취소  ".to_owned(), base),
+                     (prefix, key),
+-                    (" send prefix  ".to_owned(), base),
++                    (" 접두키 전송  ".to_owned(), base),
+                     (prefix_rhs(&keybinds.keybinds.workspace_picker), key),
+-                    (" workspace nav  ".to_owned(), base),
++                    (" 작업공간 이동  ".to_owned(), base),
+                     (prefix_rhs(&keybinds.keybinds.help), key),
+-                    (" keybinds".to_owned(), base),
++                    (" 단축키".to_owned(), base),
+                 ]);
+             }
+             ClientShellMode::Navigate => {
+                 segments.extend([
+-                    (" NAVIGATE ".to_owned(), mode_style),
+-                    (" esc back  ".to_owned(), base),
++                    (" 이동 ".to_owned(), mode_style),
++                    (" esc 뒤로  ".to_owned(), base),
+                     ("↑/↓".to_owned(), key),
+-                    (" workspace  ".to_owned(), base),
++                    (" 작업공간  ".to_owned(), base),
+                     ("tab".to_owned(), key),
+-                    (" pane  ".to_owned(), base),
++                    (" 창  ".to_owned(), base),
+                     (prefix_rhs(&keybinds.keybinds.help), key),
+-                    (" keybinds".to_owned(), base),
++                    (" 단축키".to_owned(), base),
+                 ]);
+             }
+             ClientShellMode::Resize => {
+                 segments.extend([
+-                    (" RESIZE ".to_owned(), mode_style),
++                    (" 크기 조절 ".to_owned(), mode_style),
+                     ("  ".to_owned(), base),
+                     ("h/l".to_owned(), key),
+-                    (" width  ".to_owned(), base),
++                    (" 너비  ".to_owned(), base),
+                     ("j/k".to_owned(), key),
+-                    (" height  ".to_owned(), base),
++                    (" 높이  ".to_owned(), base),
+                     ("esc".to_owned(), key),
+-                    (" done".to_owned(), base),
++                    (" 완료".to_owned(), base),
+                 ]);
+             }
+             ClientShellMode::Copy => {
+@@ -128,14 +128,14 @@ pub(super) fn render_mode_bar(
+                         crate::api::schema::PaneCopySearchDirection::Forward => "/",
+                         crate::api::schema::PaneCopySearchDirection::Backward => "?",
+                     };
+-                    buffer.set_stringn(bar.x, bar.y, " COPY ", usize::from(bar.width), mode_style);
++                    buffer.set_stringn(bar.x, bar.y, " 복사 ", usize::from(bar.width), mode_style);
+                     let prefix = 8.min(bar.width);
+                     if bar.width >= 8 {
+                         buffer.set_string(bar.x + 7, bar.y, marker, key);
+                     }
+-                    let footer = "  enter search  esc cancel";
++                    let footer = "  enter 검색  esc 취소";
+                     let footer_width = if bar.width >= 50 {
+-                        footer.len() as u16
++                        display_width(footer)
+                     } else {
+                         0
+                     };
+@@ -160,9 +160,9 @@ pub(super) fn render_mode_bar(
+                     return Some(bar);
+                 } else {
+                     let select = if copy_mode.selection.is_some() {
+-                        "selecting"
++                        "선택 중"
+                     } else {
+-                        "select"
++                        "선택"
+                     };
+                     let match_status = copy_mode
+                         .search_current_global
+@@ -171,23 +171,23 @@ pub(super) fn render_mode_bar(
+                         .unwrap_or_default();
+                     let (exit_keys, exit_label) =
+                         if copy_mode.search_query.is_empty() && copy_mode.selection.is_none() {
+-                            ("q/esc", " exit")
++                            ("q/esc", " 나가기")
+                         } else {
+-                            ("esc", " clear  q exit")
++                            ("esc", " 지우기  q 나가기")
+                         };
+                     segments.extend([
+-                        (" COPY ".to_owned(), mode_style),
++                        (" 복사 ".to_owned(), mode_style),
+                         (" ".to_owned(), base),
+                         ("h/j/k/l w/b/e { }".to_owned(), key),
+-                        (" move  ".to_owned(), base),
++                        (" 이동  ".to_owned(), base),
+                         ("/ ?".to_owned(), key),
+-                        (" search  ".to_owned(), base),
++                        (" 검색  ".to_owned(), base),
+                         ("n/N".to_owned(), key),
+-                        (format!(" repeat{match_status}  "), base),
++                        (format!(" 반복{match_status}  "), base),
+                         ("v/space".to_owned(), key),
+                         (format!(" {select}  "), base),
+                         ("y/enter".to_owned(), key),
+-                        (" copy  ".to_owned(), base),
++                        (" 복사  ".to_owned(), base),
+                         (exit_keys.to_owned(), key),
+                         (exit_label.to_owned(), base),
+                     ]);
+@@ -212,14 +212,14 @@ pub(super) fn render_mode_bar(
+         );
+     }
+     if update_available && mode == ClientShellMode::Navigate {
+-        let width = 13.min(bar.width);
++        let width = display_width(" 업데이트 준비됨").min(bar.width);
+         let area = Rect::new(bar.right().saturating_sub(width), bar.y, width, 1);
+         buffer.set_style(area, Style::default().bg(palette.panel_bg));
+         put_right_text(
+             buffer,
+             area,
+             area.y,
+-            " update ready",
++            " 업데이트 준비됨",
+             Style::default()
+                 .fg(palette.accent)
+                 .bg(palette.panel_bg)
+diff --git a/src/client/shell/settings_overlay.rs b/src/client/shell/settings_overlay.rs
+index 25f37b2..66efbac 100644
+--- a/src/client/shell/settings_overlay.rs
++++ b/src/client/shell/settings_overlay.rs
+@@ -58,7 +58,7 @@ pub(super) fn render_settings_overlay(
+         inner.x,
+         inner.y,
+         inner.width,
+-        " settings",
++        " 설정",
+         Style::default()
+             .fg(palette.text)
+             .bg(palette.panel_bg)
+@@ -162,9 +162,9 @@ pub(super) fn render_settings_overlay(
+             render_choice_section(
+                 buffer,
+                 content,
+-                "agent status indicators",
+-                "choose color dots or distinct symbols for each state",
+-                &["color dots  ● ● ● ○ ·", "distinct symbols  × ◐ ✓ ○ ·"],
++                "에이전트 상태 표시",
++                "상태를 나타낼 색상 점 또는 기호를 선택하세요",
++                &["색상 점  ● ● ● ○ ·", "상태 기호  × ◐ ✓ ○ ·"],
+                 settings.selected,
+                 palette,
+                 &mut choice_hits,
+@@ -174,9 +174,9 @@ pub(super) fn render_settings_overlay(
+             render_choice_section(
+                 buffer,
+                 content,
+-                "sound alerts",
+-                "play sounds when agents change state in background",
+-                &["on", "off"],
++                "소리 알림",
++                "백그라운드 에이전트의 상태가 바뀌면 소리로 알립니다",
++                &["켜기", "끄기"],
+                 settings.selected,
+                 palette,
+                 &mut choice_hits,
+@@ -186,9 +186,9 @@ pub(super) fn render_settings_overlay(
+             render_choice_section(
+                 buffer,
+                 content,
+-                "notification popups",
+-                "choose where background popup notifications should appear",
+-                &["off", "inside herdr", "via terminal", "via system"],
++                "팝업 알림",
++                "백그라운드 알림을 표시할 위치를 선택하세요",
++                &["끄기", "Herdr 안에 표시", "터미널 알림", "시스템 알림"],
+                 settings.selected,
+                 palette,
+                 &mut choice_hits,
+@@ -212,9 +212,9 @@ pub(super) fn render_settings_overlay(
+             buffer,
+             primary,
+             if settings.section == ClientSettingsSection::Integrations {
+-                " ↵ install "
++                " ↵ 설치 "
+             } else {
+-                " ↵ apply "
++                " ↵ 적용 "
+             },
+             Style::default()
+                 .fg(contrast(palette))
+@@ -228,7 +228,7 @@ pub(super) fn render_settings_overlay(
+     button(
+         buffer,
+         close,
+-        " esc close ",
++        " esc 닫기 ",
+         Style::default()
+             .fg(palette.text)
+             .bg(palette.surface0)
+@@ -239,7 +239,7 @@ pub(super) fn render_settings_overlay(
+         inner.x,
+         inner.bottom().saturating_sub(2),
+         inner.width,
+-        " ↑↓ select  tab section",
++        " ↑↓ 선택  tab 항목 전환",
+         Style::default().fg(palette.overlay1).bg(palette.panel_bg),
+     );
+ 
+@@ -306,7 +306,7 @@ fn render_integrations(
+         area.x,
+         area.y,
+         area.width,
+-        "agent integrations",
++        "에이전트 연동",
+         Style::default()
+             .fg(palette.text)
+             .bg(palette.panel_bg)
+@@ -317,7 +317,7 @@ fn render_integrations(
+         area.x,
+         area.y + 1,
+         area.width,
+-        "enable session restore and, where supported, direct status updates",
++        "세션 복원과 지원되는 에이전트의 상태 보고를 활성화합니다",
+         Style::default().fg(palette.overlay1).bg(palette.panel_bg),
+     );
+     if settings.loading_integrations {
+@@ -326,7 +326,7 @@ fn render_integrations(
+             area.x,
+             area.y + 3,
+             area.width,
+-            " loading integrations…",
++            " 연동 목록 불러오는 중…",
+             Style::default().fg(palette.overlay1).bg(palette.panel_bg),
+         );
+         return;
+@@ -337,7 +337,7 @@ fn render_integrations(
+             area.x,
+             area.y + 3,
+             area.width,
+-            " no integration targets available",
++            " 연동할 수 있는 에이전트가 없습니다",
+             Style::default().fg(palette.overlay1).bg(palette.panel_bg),
+         );
+         return;
+@@ -348,15 +348,15 @@ fn render_integrations(
+             break;
+         }
+         let (marker, color, status) = match integration.state {
+-            crate::api::schema::IntegrationState::Current => ("✓", palette.green, "installed"),
++            crate::api::schema::IntegrationState::Current => ("✓", palette.green, "설치됨"),
+             crate::api::schema::IntegrationState::Outdated => {
+-                ("↻", palette.yellow, "update available")
++                ("↻", palette.yellow, "업데이트 가능")
+             }
+             crate::api::schema::IntegrationState::NotInstalled if integration.available => {
+-                ("+", palette.accent, "available")
++                ("+", palette.accent, "설치 가능")
+             }
+             crate::api::schema::IntegrationState::NotInstalled => {
+-                ("–", palette.overlay0, "not found")
++                ("–", palette.overlay0, "찾을 수 없음")
+             }
+         };
+         put_text(
+@@ -408,7 +408,7 @@ fn render_integrations(
+             area.x,
+             message_y,
+             area.width,
+-            " installing…",
++            " 설치 중…",
+             Style::default().fg(palette.overlay1).bg(palette.panel_bg),
+         );
+     }
+diff --git a/src/client/shell/sidebar.rs b/src/client/shell/sidebar.rs
+index 46c3a1a..7f05e37 100644
+--- a/src/client/shell/sidebar.rs
++++ b/src/client/shell/sidebar.rs
+@@ -220,7 +220,7 @@ pub(crate) fn render_sidebar(
+         workspace_area.x,
+         workspace_area.y,
+         workspace_area.width,
+-        " spaces",
++        " 작업공간",
+         Style::default()
+             .fg(palette.overlay0)
+             .add_modifier(Modifier::BOLD),
+@@ -388,7 +388,7 @@ pub(crate) fn render_sidebar(
+             workspace_area.x,
+             footer_y,
+             workspace_area.width,
+-            " new",
++            " 새로",
+             Style::default().fg(palette.overlay0),
+         );
+         let attention = super::super::global_menu::global_menu_attention(snapshot);
+@@ -416,7 +416,7 @@ pub(crate) fn render_sidebar(
+                 start_x.saturating_add(2),
+                 footer_y,
+                 4,
+-                "menu",
++                "메뉴",
+                 Style::default().fg(palette.overlay0),
+             );
+         } else {
+@@ -424,7 +424,7 @@ pub(crate) fn render_sidebar(
+                 buffer,
+                 workspace_area,
+                 footer_y,
+-                "menu",
++                "메뉴",
+                 Style::default().fg(palette.overlay0),
+             );
+         }
+@@ -681,7 +681,7 @@ pub(in crate::client::shell) fn workspace_rows(
+         crate::ui::SpaceTokenContext {
+             workspace: label,
+             branch: workspace.branch.as_deref(),
+-            state_text: status_text(status),
++            state_text: super::super::agent_sidebar::sidebar_status_text(status),
+             ahead_behind: workspace.git_ahead_behind,
+             tokens: &token_values,
+             suppress_git_details: indented,
+diff --git a/src/client/shell/state.rs b/src/client/shell/state.rs
+index 5a73292..ade2528 100644
+--- a/src/client/shell/state.rs
++++ b/src/client/shell/state.rs
+@@ -401,11 +401,11 @@ impl ClientSettingsSection {
+ 
+     pub(super) fn label(self) -> &'static str {
+         match self {
+-            Self::Theme => "theme",
+-            Self::Indicators => "indicators",
+-            Self::Sound => "sound",
+-            Self::Toast => "toasts",
+-            Self::Integrations => "integrations",
++            Self::Theme => "테마",
++            Self::Indicators => "상태 표시",
++            Self::Sound => "소리",
++            Self::Toast => "팝업 알림",
++            Self::Integrations => "연동",
+         }
+     }
+ }
+@@ -1824,7 +1824,7 @@ impl ClientShellState {
+             return false;
+         }
+         self.copy_feedback = Some(crate::app::state::CopyFeedback {
+-            message: "copied to clipboard".to_owned(),
++            message: "클립보드에 복사됨".to_owned(),
+         });
+         self.copy_feedback_deadline = Some(now + std::time::Duration::from_secs(2));
+         true
+diff --git a/src/client/shell/tests/agents_worktrees_notifications.rs b/src/client/shell/tests/agents_worktrees_notifications.rs
+index df09f46..2393cb2 100644
+--- a/src/client/shell/tests/agents_worktrees_notifications.rs
++++ b/src/client/shell/tests/agents_worktrees_notifications.rs
+@@ -125,7 +125,7 @@ fn grouped_worktrees_render_parent_branch_and_indented_child() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -257,7 +257,7 @@ fn duplicate_repo_parents_remain_visible_and_focusable_when_collapsed() {
+             let Some(ClientShellOverlay::ContextMenu(menu)) = state.overlay.as_ref() else {
+                 panic!("repository workspace context menu");
+             };
+-            assert_eq!(menu.items()[1].label, "Close");
++            assert_eq!(menu.items()[1].label, "닫기");
+             assert_eq!(
+                 menu.items()
+                     .iter()
+@@ -278,7 +278,7 @@ fn duplicate_repo_parents_remain_visible_and_focusable_when_collapsed() {
+                 assert!(close.actions.is_empty());
+                 assert!(matches!(state.overlay.as_ref(),
+                     Some(ClientShellOverlay::ConfirmClose(confirm))
+-                        if confirm.title == "Close workspace?" && !confirm.close_group));
++                        if confirm.title == "작업공간을 닫을까요?" && !confirm.close_group));
+                 close = state.handle_input_bytes(b"\r");
+             }
+             assert!(matches!(close.actions.as_slice(),
+@@ -717,7 +717,7 @@ fn agent_sidebar_honors_priority_symbols_tokens_and_stable_hits() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -844,7 +844,7 @@ fn workspace_state_text_does_not_stack_terminal_faint() {
+     let frame = state.compose(106, 30).expect("workspace sidebar frame");
+     let rect = state.hits.workspaces.first().expect("workspace hit").rect;
+     let buffer = frame.to_ratatui_buffer().expect("workspace sidebar buffer");
+-    let (x, y) = cell_symbol_position(&frame, rect, "idle");
++    let (x, y) = cell_symbol_position(&frame, rect, "대기");
+     let cell = buffer.cell((x, y)).expect("workspace state text cell");
+     assert!(
+         !cell.modifier.contains(Modifier::DIM),
+@@ -1194,13 +1194,13 @@ fn navigate_mode_selects_workspace_locally_then_focuses_by_stable_id() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+     assert!(text.contains("second"));
+-    assert!(text.contains("NAVIGATE"));
++    assert!(text.contains("이동"));
+ 
+     let focus = state.handle_input_bytes(b"\r");
+     let [ClientShellAction::Endpoint { request, .. }] = &focus.actions[..] else {
+@@ -1244,13 +1244,13 @@ fn worktree_create_previews_the_endpoint_owned_checkout_path() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("new worktree"));
+-    assert!(text.contains("create and open"));
++    assert!(text.contains("새 워크트리"));
++    assert!(text.contains("만들고 열기"));
+     assert!(frame.cursor.as_ref().is_some_and(|cursor| cursor.visible));
+ 
+     assert!(state
+@@ -1393,7 +1393,7 @@ fn worktree_open_filters_and_clicks_a_stable_public_entry() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -1488,13 +1488,13 @@ fn worktree_remove_escalates_recoverable_failure_to_force_confirmation() {
+             .chunks(frame.width as usize)
+             .map(|row| {
+                 row.iter()
+-                    .map(|cell| cell.symbol.as_str())
++                    .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                     .collect::<String>()
+             })
+             .collect::<Vec<_>>()
+             .join("\n");
+-        assert!(text.contains("delete anyway"));
+-        assert!(text.contains("permanently deleted"));
++        assert!(text.contains("강제 삭제"));
++        assert!(text.contains("영구 삭제"));
+         let force = state.handle_input_bytes(b"\r");
+         let [ClientShellAction::Endpoint { request, .. }] = &force.actions[..] else {
+             panic!("forced worktree remove should use endpoint API");
+@@ -1582,7 +1582,7 @@ fn semantic_notifications_use_client_policy_and_stable_navigation_targets() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+diff --git a/src/client/shell/tests/chrome_context.rs b/src/client/shell/tests/chrome_context.rs
+index 1ef9879..36aa0fc 100644
+--- a/src/client/shell/tests/chrome_context.rs
++++ b/src/client/shell/tests/chrome_context.rs
+@@ -231,13 +231,13 @@ fn client_owned_sidebar_dividers_resize_live() {
+     let waiting_text: String = waiting_frame
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect();
+     assert!(
+-        waiting_text.contains(" spaces"),
++        waiting_text.contains(" 작업공간"),
+         "local sidebar must keep spaces while resizing: {waiting_text}"
+     );
+-    assert!(!waiting_text.contains(" machines"));
++    assert!(!waiting_text.contains(" 컴퓨터"));
+     assert!(!waiting_text.contains("Select a connected machine"));
+     assert!(!waiting_text.contains("LIVE"));
+     assert!(waiting_frame.cursor.is_none());
+@@ -271,9 +271,9 @@ fn client_owned_sidebar_dividers_resize_live() {
+     let recovered_text: String = recovered_frame
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect();
+-    assert!(recovered_text.contains(" spaces"));
++    assert!(recovered_text.contains(" 작업공간"));
+     assert!(recovered_text.contains("LIVE"));
+     assert!(!state.hits.panes.is_empty());
+     let section_divider = state.hits.sidebar_section_divider;
+@@ -399,15 +399,15 @@ fn global_menu_opens_from_sidebar_and_routes_client_actions() {
+         .chunks(menu.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("settings"));
+-    assert!(text.contains("keybinds"));
+-    assert!(text.contains("reload config"));
+-    assert!(text.contains("detach"));
++    assert!(text.contains("설정"));
++    assert!(text.contains("단축키"));
++    assert!(text.contains("설정 다시 읽기"));
++    assert!(text.contains("연결 해제"));
+ 
+     let keybinds = state.hits.global_menu_rows[1].0;
+     let help = state.handle_raw_events(vec![RawInputEvent::Mouse(crossterm::event::MouseEvent {
+@@ -444,13 +444,13 @@ fn new_tab_overlay_owns_text_cursor_and_submits_public_api_request() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("new tab"));
+-    assert!(text.contains("save"));
++    assert!(text.contains("새 탭"));
++    assert!(text.contains("저장"));
+     let restored = frame.to_ratatui_buffer().expect("overlay frame");
+     assert!(!restored
+         .cell((26, 7))
+@@ -509,13 +509,13 @@ fn close_confirmation_error_becomes_client_owned_overlay_and_stable_workspace_cl
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("Close workspace?"));
+-    assert!(text.contains("1 pane"));
++    assert!(text.contains("작업공간을 닫을까요?"));
++    assert!(text.contains("창 1개"));
+ 
+     let confirm = state.handle_input_bytes(b"\r");
+     let [ClientShellAction::Endpoint { request, .. }] = &confirm.actions[..] else {
+diff --git a/src/client/shell/tests/close_pane.rs b/src/client/shell/tests/close_pane.rs
+index 970afe2..e507642 100644
+--- a/src/client/shell/tests/close_pane.rs
++++ b/src/client/shell/tests/close_pane.rs
+@@ -94,8 +94,8 @@ fn last_pane_close_waits_for_keyboard_or_mouse_confirmation() {
+         ));
+         let frame = state.compose(106, 24).unwrap();
+         let text = frame_rows(&frame).join("\n");
+-        assert!(text.contains("Close workspace?"));
+-        assert!(text.contains("1 pane"));
++        assert!(text.contains("작업공간을 닫을까요?"));
++        assert!(text.contains("창 1개"));
+         let accepted = if menu {
+             let primary = state.hits.overlay_primary;
+             click(&mut state, primary)
+@@ -266,7 +266,7 @@ fn last_pane_close_preserves_parent_group_and_linked_workspace_scope() {
+                 }),
+             );
+             assert!(matches!(state.overlay.as_ref(),
+-                Some(ClientShellOverlay::ConfirmClose(confirm)) if confirm.title == "Close worktree group?"));
++                Some(ClientShellOverlay::ConfirmClose(confirm)) if confirm.title == "워크트리 그룹을 닫을까요?"));
+             let accepted = state.handle_input_bytes(b"\r");
+             assert!(matches!(accepted.actions.as_slice(),
+                 [ClientShellAction::Endpoint { request, .. }]
+diff --git a/src/client/shell/tests/close_tab.rs b/src/client/shell/tests/close_tab.rs
+index d5e897a..37c1195 100644
+--- a/src/client/shell/tests/close_tab.rs
++++ b/src/client/shell/tests/close_tab.rs
+@@ -78,8 +78,8 @@ fn last_tab_close_waits_for_keyboard_or_mouse_confirmation() {
+         ));
+         let frame = state.compose(106, 24).unwrap();
+         let text = frame_rows(&frame).join("\n");
+-        assert!(text.contains("Close workspace?"));
+-        assert!(text.contains("1 pane"));
++        assert!(text.contains("작업공간을 닫을까요?"));
++        assert!(text.contains("창 1개"));
+         let accepted = if menu {
+             let primary = state.hits.overlay_primary;
+             click(&mut state, primary)
+@@ -230,7 +230,7 @@ fn last_tab_close_preserves_parent_group_and_linked_workspace_scope() {
+                 }),
+             );
+             assert!(matches!(state.overlay.as_ref(),
+-                Some(ClientShellOverlay::ConfirmClose(confirm)) if confirm.title == "Close worktree group?"));
++                Some(ClientShellOverlay::ConfirmClose(confirm)) if confirm.title == "워크트리 그룹을 닫을까요?"));
+             let accepted = state.handle_input_bytes(b"\r");
+             assert!(matches!(accepted.actions.as_slice(),
+                 [ClientShellAction::Endpoint { request, .. }]
+diff --git a/src/client/shell/tests/copy.rs b/src/client/shell/tests/copy.rs
+index 317950c..b7af59e 100644
+--- a/src/client/shell/tests/copy.rs
++++ b/src/client/shell/tests/copy.rs
+@@ -216,7 +216,7 @@ fn client_mouse_selection_highlights_and_copies_through_endpoint_extraction() {
+             .copy_feedback
+             .as_ref()
+             .map(|feedback| feedback.message.as_str()),
+-        Some("copied to clipboard")
++        Some("클립보드에 복사됨")
+     );
+ }
+ 
+@@ -230,7 +230,7 @@ fn clipboard_feedback_is_client_local_and_respects_config() {
+             .copy_feedback
+             .as_ref()
+             .map(|feedback| feedback.message.as_str()),
+-        Some("copied to clipboard")
++        Some("클립보드에 복사됨")
+     );
+     assert_eq!(
+         state.copy_feedback_deadline,
+@@ -1023,7 +1023,7 @@ fn navigator_renders_every_terminal_in_workspace_sections() {
+                 frame.cells[rect.y as usize * frame.width as usize + rect.x as usize..]
+                     .iter()
+                     .take(rect.width as usize)
+-                    .map(|cell| cell.symbol.as_str())
++                    .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                     .collect::<String>()
+             })
+             .collect::<Vec<_>>()
+@@ -1218,8 +1218,8 @@ fn navigator_searches_ancestor_context_and_keeps_split_agents_individually_actio
+         .collect::<Vec<_>>();
+     assert_eq!(pane_rows.len(), 2);
+     for ((rect, _), (name, kind, status)) in pane_rows.iter().zip([
+-        ("writer", "pi", "working"),
+-        ("reviewer", "claude", "blocked"),
++        ("writer", "pi", "작업 중"),
++        ("reviewer", "claude", "응답 필요"),
+     ]) {
+         cell_symbol_position(&frame, *rect, name);
+         cell_symbol_position(&frame, *rect, kind);
+@@ -1724,13 +1724,13 @@ fn navigator_owns_search_mouse_selection_and_stable_target_focus() {
+         .chunks(navigator.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+     assert!(navigator_text.contains("client-shell"));
+-    assert!(navigator_text.contains("terminal"));
++    assert!(navigator_text.contains("터미널"));
+     assert!(!navigator_text.contains("pane 1"));
+ 
+     let search = state.hits.navigator_search;
+diff --git a/src/client/shell/tests/endpoints.rs b/src/client/shell/tests/endpoints.rs
+index c0a7e52..42b8374 100644
+--- a/src/client/shell/tests/endpoints.rs
++++ b/src/client/shell/tests/endpoints.rs
+@@ -759,7 +759,7 @@ fn machine_navigation_does_not_require_a_local_snapshot_or_surface() {
+         let local_row = (local.x..local.right())
+             .map(|x| buffer[(x, local.y)].symbol())
+             .collect::<String>();
+-        assert!(!local_row.contains("reconnecting"));
++        assert!(!local_row.contains("다시 연결 중"));
+         assert!(
+             !local_row.contains('◐'),
+             "Local never gets a connection badge"
+@@ -800,7 +800,7 @@ fn sidebar_renders_local_and_saved_ssh_endpoints_with_status() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -1290,14 +1290,14 @@ fn aggregate_agents_use_configured_rows_machine_token_and_status_colors() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+     assert!(text.contains("○ Local · local agent"), "frame: {text}");
+     assert!(text.contains("× Build · remote agent"), "frame: {text}");
+-    assert!(text.contains("grouped"), "frame: {text}");
++    assert!(text.contains("작업공간순"), "frame: {text}");
+     let toggle = state.hits.agent_sort_toggle;
+     assert!(!toggle.is_empty());
+     let click = state.handle_raw_events(vec![RawInputEvent::Mouse(MouseEvent {
+@@ -1358,7 +1358,7 @@ fn current_workspace_agent_view_excludes_same_workspace_id_on_other_machine() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -1376,7 +1376,7 @@ fn current_workspace_agent_view_excludes_same_workspace_id_on_other_machine() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -1445,7 +1445,7 @@ fn current_workspace_or_blocked_keeps_foreign_attention_only() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -1501,14 +1501,14 @@ fn selected_default_view_ignores_inactive_endpoint_projection() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+     assert!(text.contains("Local · local agent"), "frame: {text}");
+     assert!(text.contains("Build · remote agent"), "frame: {text}");
+-    assert!(text.contains("grouped"), "frame: {text}");
++    assert!(text.contains("작업공간순"), "frame: {text}");
+ }
+ 
+ #[test]
+@@ -1587,7 +1587,7 @@ fn legacy_custom_views_keep_v1_per_endpoint_projection() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -1639,7 +1639,7 @@ fn selected_custom_sort_orders_rendering_and_indexed_navigation() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -1764,7 +1764,7 @@ fn aggregate_priority_uses_client_observed_recency_across_machines() {
+             .chunks(frame.width as usize)
+             .map(|row| {
+                 row.iter()
+-                    .map(|cell| cell.symbol.as_str())
++                    .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                     .collect::<String>()
+             })
+             .collect::<Vec<_>>()
+@@ -2227,7 +2227,7 @@ fn disconnected_active_endpoint_freezes_surface_and_marks_cached_ui_stale() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -2238,7 +2238,7 @@ fn disconnected_active_endpoint_freezes_surface_and_marks_cached_ui_stale() {
+         state.endpoint_status(&endpoint_id),
+         Some(ClientEndpointStatus::Reconnecting)
+     );
+-    assert!(text.contains("◐ reconnecting"), "frame: {text}");
++    assert!(text.contains("◐ 다시 연결 중"), "frame: {text}");
+     assert!(text.contains("Build · remote agent"), "frame: {text}");
+     assert!(
+         text.contains("LIVE"),
+@@ -2357,7 +2357,7 @@ fn navigator_uses_machine_parents_only_for_federated_clients() {
+         let prefix = frame.cells[rect.y as usize * frame.width as usize + rect.x as usize..]
+             .iter()
+             .take(expected.chars().count())
+-            .map(|cell| cell.symbol.as_str())
++            .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+             .collect::<String>();
+         assert_eq!(prefix, expected, "{target:?}");
+     }
+@@ -2372,12 +2372,12 @@ fn navigator_uses_machine_parents_only_for_federated_clients() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n")
+-        .contains(" machines"));
++        .contains(" 컴퓨터"));
+     local.open_navigator_overlay();
+     let ClientShellOverlay::Navigator(navigator) = local.overlay.as_ref().expect("navigator")
+     else {
+@@ -2639,7 +2639,7 @@ fn cached_offline_navigator_and_mobile_targets_are_dimmed_and_disabled() {
+             })
+             .expect("cached remote pane row");
+         assert!(row.stale);
+-        assert!(!row.meta.contains("reconnecting"));
++        assert!(!row.meta.contains("다시 연결 중"));
+         row.target.clone()
+     };
+     if let Some(ClientShellOverlay::Navigator(navigator)) = state.overlay.as_mut() {
+diff --git a/src/client/shell/tests/input.rs b/src/client/shell/tests/input.rs
+index 8b817d0..8115511 100644
+--- a/src/client/shell/tests/input.rs
++++ b/src/client/shell/tests/input.rs
+@@ -800,29 +800,32 @@ fn help_overlay_uses_live_keymap_and_owns_filter_state() {
+         .chunks(initial.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("keybinds"));
+-    assert!(text.contains("prefix mode"));
++    assert!(text.contains("단축키"));
++    assert!(text.contains("접두키 모드"));
+ 
+     assert!(state.handle_input_bytes(b"/").actions.is_empty());
+-    assert!(state.handle_input_bytes(b"workspace").actions.is_empty());
++    assert!(state
++        .handle_input_bytes("작업공간".as_bytes())
++        .actions
++        .is_empty());
+     let filtered = state.compose(106, 30).expect("filtered help");
+     let text = filtered
+         .cells
+         .chunks(filtered.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("workspace navigation"));
+-    assert!(!text.contains("prefix mode"));
++    assert!(text.contains("작업공간 이동"));
++    assert!(!text.contains("접두키 모드"));
+     assert!(filtered
+         .cursor
+         .as_ref()
+diff --git a/src/client/shell/tests/keybindings_settings.rs b/src/client/shell/tests/keybindings_settings.rs
+index fd3301d..9abd500 100644
+--- a/src/client/shell/tests/keybindings_settings.rs
++++ b/src/client/shell/tests/keybindings_settings.rs
+@@ -273,7 +273,7 @@ fn tab_bar_renders_endpoint_status_ellipses_and_clamps_to_useful_scroll() {
+     let frame = state.compose(106, 20).expect("status and overflow tabs");
+     let top = frame.cells[..frame.width as usize]
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+     assert!(top.contains("ZOOM · host"));
+     assert!(top.contains('…'));
+@@ -298,7 +298,7 @@ fn tab_bar_renders_endpoint_status_ellipses_and_clamps_to_useful_scroll() {
+     let narrow = state.compose(45, 20).expect("narrow tab frame");
+     let top = narrow.cells[..narrow.width as usize]
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+     assert!(!top.contains("ZOOM · host"));
+ }
+@@ -366,12 +366,12 @@ detach = "prefix+x"
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("PREFIX"), "frame: {text:?}");
++    assert!(text.contains("접두키"), "frame: {text:?}");
+     assert!(text.contains("ctrl+a"), "frame: {text:?}");
+ 
+     let detach = state.handle_input_bytes(b"x");
+@@ -859,12 +859,12 @@ fn help_overlay_restores_released_search_scroll_and_custom_binding_behavior() {
+         .chunks(initial.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("global"));
++    assert!(text.contains("공통"));
+     assert!(state.hits.help_max_scroll > 0);
+     assert_ne!(state.hits.help_scrollbar, Rect::default());
+ 
+@@ -876,12 +876,12 @@ fn help_overlay_restores_released_search_scroll_and_custom_binding_behavior() {
+         .chunks(custom.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("custom"));
++    assert!(text.contains("사용자 지정"));
+     assert!(text.contains("run plugin action"));
+     state.handle_input_bytes(b"\x1b");
+ 
+@@ -893,12 +893,12 @@ fn help_overlay_restores_released_search_scroll_and_custom_binding_behavior() {
+         .chunks(empty.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("no matching keybinds"));
++    assert!(text.contains("일치하는 단축키가 없습니다"));
+ 
+     state.handle_input_bytes(b"\x1b");
+     assert!(matches!(
+diff --git a/src/client/shell/tests/korean.rs b/src/client/shell/tests/korean.rs
+new file mode 100644
+index 0000000..309076d
+--- /dev/null
++++ b/src/client/shell/tests/korean.rs
+@@ -0,0 +1,35 @@
++use super::*;
++
++fn text(state: &mut ClientShellState, cols: u16, rows: u16) -> String {
++    let frame = state.compose(cols, rows).expect("Korean UI frame");
++    frame_rows(&frame).join("\n")
++}
++
++#[test]
++fn korean_ui_keeps_menus_settings_and_help_usable_at_multiple_sizes() {
++    for (cols, rows) in [(106, 30), (80, 24), (44, 30)] {
++        let mut state = ClientShellState::new(ClientShellConfig::from_config(&Config::default()));
++        state.set_snapshot(Box::new(snapshot()));
++        state.set_pane_surface(surface());
++        let screen = text(&mut state, cols, rows);
++        assert!(screen.contains("client-shell"));
++
++        state.open_settings_overlay();
++        let screen = text(&mut state, cols, rows);
++        assert!(screen.contains("설정"));
++        assert!(screen.contains("테마"));
++        assert!(screen.contains("닫기"));
++        let close = state.hits.overlay_cancel;
++        assert!(close.width >= 10);
++        assert!(close.right() <= cols);
++
++        state.overlay = Some(ClientShellOverlay::Help(ClientHelpOverlay {
++            query: TextEditor::from("작업공간"),
++            search_focused: false,
++            scroll: 0,
++        }));
++        let screen = text(&mut state, cols, rows);
++        assert!(screen.contains("작업공간"));
++        assert!(!screen.contains("일치하는 단축키가 없습니다"));
++    }
++}
+diff --git a/src/client/shell/tests/mobile.rs b/src/client/shell/tests/mobile.rs
+index 4dac549..b7e581a 100644
+--- a/src/client/shell/tests/mobile.rs
++++ b/src/client/shell/tests/mobile.rs
+@@ -18,11 +18,11 @@ fn navigate_update_status_uses_released_desktop_and_mobile_placement() {
+         let start = usize::from(row) * width;
+         frame.cells[start..start + width]
+             .iter()
+-            .map(|cell| cell.symbol.as_str())
++            .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+             .collect::<String>()
+     };
+-    assert!(row_text(&bottom, 29).contains("update ready"));
+-    assert!(!row_text(&bottom, 28).contains("update ready"));
++    assert!(row_text(&bottom, 29).contains("업데이트 준비됨"));
++    assert!(!row_text(&bottom, 28).contains("업데이트 준비됨"));
+     assert!(state.hits.tabs.is_empty());
+     assert!(state.hits.new_tab.is_empty());
+     assert!(state.hits.tab_scroll_left.is_empty());
+@@ -45,15 +45,15 @@ fn navigate_update_status_uses_released_desktop_and_mobile_placement() {
+         deadline: std::time::Instant::now(),
+     });
+     let top = state.compose(106, 30).expect("top-tab update shell");
+-    assert!(row_text(&top, 29).contains("update ready"));
++    assert!(row_text(&top, 29).contains("업데이트 준비됨"));
+ 
+     let mobile = state.compose(44, 30).expect("mobile update shell");
+     let mobile_text = mobile
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(mobile_text.contains("update ready"));
++    assert!(mobile_text.contains("업데이트 준비됨"));
+ }
+ 
+ #[test]
+@@ -93,9 +93,9 @@ fn mobile_switcher_can_activate_an_online_saved_machine() {
+     let text = frame
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(text.contains("machines"));
++    assert!(text.contains("컴퓨터"));
+     assert!(text.contains("Build"));
+     let machine = state
+         .hits
+@@ -156,9 +156,9 @@ fn mobile_switcher_can_activate_an_online_saved_machine() {
+     let text = stale
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(text.contains("reconnecting"), "frame: {text}");
++    assert!(text.contains("다시 연결 중"), "frame: {text}");
+     assert!(text.contains("network lost"), "frame: {text}");
+ }
+ 
+@@ -216,12 +216,12 @@ fn mobile_header_and_switcher_render_released_sections_and_stable_targets() {
+     let header_text = header
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+     assert!(header_text.contains("client-shell"));
+-    assert!(header_text.contains("tab 1"));
+-    assert!(header_text.contains("blocked"));
+-    assert!(header_text.contains("switch"));
++    assert!(header_text.contains("탭 1"));
++    assert!(header_text.contains("응답 필요"));
++    assert!(header_text.contains("전환"));
+     assert_eq!(state.hits.mobile_switch, Rect::new(34, 0, 10, 2));
+ 
+     let click = |rect: Rect| {
+@@ -241,7 +241,7 @@ fn mobile_header_and_switcher_render_released_sections_and_stable_targets() {
+         .chunks(switcher.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -251,16 +251,16 @@ fn mobile_header_and_switcher_render_released_sections_and_stable_targets() {
+         "switcher must clear the pane surface"
+     );
+     for expected in [
+-        "switch",
+-        "close",
+-        "agents",
+-        "spaces",
+-        "+ new workspace",
+-        "tabs",
+-        "+ new tab",
+-        "menu",
+-        "settings",
+-        "detach",
++        "전환",
++        "닫기",
++        "에이전트",
++        "작업공간",
++        "+ 새 작업공간",
++        "탭",
++        "+ 새 탭",
++        "메뉴",
++        "설정",
++        "연결 해제",
+     ] {
+         assert!(switcher_text.contains(expected), "missing {expected}");
+     }
+@@ -395,12 +395,12 @@ fn mobile_background_workspace_uses_its_own_active_tab_status() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("feature · tab two · 2/2"), "{text}");
++    assert!(text.contains("feature · 탭 two · 2/2"), "{text}");
+     assert!(text.contains("2 · logs"), "{text}");
+     assert!(!text.contains("7 · logs"), "{text}");
+ }
+diff --git a/src/client/shell/tests/mod.rs b/src/client/shell/tests/mod.rs
+index 05bfc26..e68c8cc 100644
+--- a/src/client/shell/tests/mod.rs
++++ b/src/client/shell/tests/mod.rs
+@@ -5,6 +5,7 @@ use crate::protocol::{
+     PaneSurfaceSplit, PaneSurfaceSplitDirection, SurfaceRect,
+ };
+ use crossterm::event::MouseEvent;
++mod korean;
+ mod text_editing;
+ 
+ pub(super) fn snapshot() -> ClientShellSnapshot {
+@@ -134,11 +135,24 @@ fn surface() -> PaneSurfaceFrame {
+     }
+ }
+ 
++fn visible_cell_symbol<'a>(skip: &mut usize, cell: &'a crate::protocol::CellData) -> &'a str {
++    if *skip > 0 {
++        *skip -= 1;
++        return "";
++    }
++    *skip = unicode_width::UnicodeWidthStr::width(cell.symbol.as_str()).saturating_sub(1);
++    cell.symbol.as_str()
++}
++
+ fn frame_rows(frame: &FrameData) -> Vec<String> {
+     frame
+         .cells
+         .chunks(frame.width as usize)
+-        .map(|row| row.iter().map(|cell| cell.symbol.as_str()).collect())
++        .map(|row| {
++            row.iter()
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
++                .collect()
++        })
+         .collect()
+ }
+ 
+@@ -146,14 +160,14 @@ fn frame_rows(frame: &FrameData) -> Vec<String> {
+ fn cell_symbol_position(frame: &FrameData, area: Rect, needle: &str) -> (u16, u16) {
+     let rows = frame_rows(frame);
+     for y in area.y..area.bottom().min(frame.height) {
+-        let row = &rows[y as usize];
+-        let slice = row
+-            .chars()
+-            .skip(area.x as usize)
+-            .take(area.width as usize)
++        let start = y as usize * frame.width as usize;
++        let slice = frame.cells
++            [start + area.x as usize..start + area.right().min(frame.width) as usize]
++            .iter()
++            .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+             .collect::<String>();
+         if let Some(byte) = slice.find(needle) {
+-            let column = slice[..byte].chars().count() as u16 + area.x;
++            let column = unicode_width::UnicodeWidthStr::width(&slice[..byte]) as u16 + area.x;
+             return (column, y);
+         }
+     }
+diff --git a/src/client/shell/tests/popup_focus_projection.rs b/src/client/shell/tests/popup_focus_projection.rs
+index c9f0227..2b46688 100644
+--- a/src/client/shell/tests/popup_focus_projection.rs
++++ b/src/client/shell/tests/popup_focus_projection.rs
+@@ -160,12 +160,12 @@ fn desktop_composition_keeps_shell_outside_origin_relative_surface() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("spaces"));
++    assert!(text.contains("작업공간"));
+     assert!(text.contains("client-shell"));
+     assert!(text.contains("main"));
+     assert!(text.contains("LIVE"));
+@@ -193,7 +193,7 @@ fn client_composes_popup_terminal_content_inside_client_owned_chrome() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+diff --git a/src/client/shell/tests/startup_overlays.rs b/src/client/shell/tests/startup_overlays.rs
+index bddcde1..e16b8f9 100644
+--- a/src/client/shell/tests/startup_overlays.rs
++++ b/src/client/shell/tests/startup_overlays.rs
+@@ -24,13 +24,13 @@ fn endpoint_product_announcement_is_client_rendered_modal_and_dismissed_by_ident
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+     assert!(text.contains("A client-owned announcement"));
+-    assert!(text.contains("product announcement · v0.8.2"));
++    assert!(text.contains("제품 안내 · v0.8.2"));
+     assert!(!state.hits.product_announcement_scrollbar.is_empty());
+ 
+     let popup_key = state.handle_input_bytes(b"x");
+@@ -307,16 +307,16 @@ fn startup_onboarding_is_client_rendered_and_modal() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("terminal workspace manager for coding agents"));
+-    assert!(text.contains("this is a mouse-first terminal"));
+-    assert!(text.contains("ctrl+b enters prefix mode"));
+-    assert!(text.contains("install optional agent integrations"));
+-    assert_eq!(state.hits.overlay_primary.width, 12);
++    assert!(text.contains("코딩 에이전트를 위한 터미널 작업공간"));
++    assert!(text.contains("마우스로 편리하게 조작하는 터미널"));
++    assert!(text.contains("ctrl+b 접두키 모드"));
++    assert!(text.contains("에이전트 연동을 설치하세요"));
++    assert_eq!(state.hits.overlay_primary.width, 8);
+ 
+     let ignored = state.handle_input_bytes(b"x");
+     assert!(ignored.requests.is_empty());
+@@ -362,11 +362,11 @@ fn startup_onboarding_shows_configured_prefix() {
+     let text = frame
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(text.contains("ctrl+shift+b enters prefix mode"));
+-    assert!(text.contains("shows keybinds and settings"));
+-    assert!(!text.contains("ctrl+b enters prefix mode"));
++    assert!(text.contains("ctrl+shift+b 접두키 모드"));
++    assert!(text.contains("단축키와 설정 보기"));
++    assert!(!text.contains("ctrl+b 접두키 모드"));
+ }
+ 
+ #[test]
+@@ -533,7 +533,7 @@ fn startup_config_diagnostics_are_client_rendered_and_persist_until_replaced() {
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+@@ -702,9 +702,9 @@ fn update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version()
+     let navigate_text = navigate
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(navigate_text.contains("update ready"));
++    assert!(navigate_text.contains("업데이트 준비됨"));
+     state.mode = ClientShellMode::Prefix;
+     let prefix = state
+         .compose(106, 30)
+@@ -712,9 +712,9 @@ fn update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version()
+     let prefix_text = prefix
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(!prefix_text.contains("update ready"));
++    assert!(!prefix_text.contains("업데이트 준비됨"));
+     state.mode = ClientShellMode::Navigate;
+ 
+     state.toggle_global_menu();
+@@ -724,14 +724,14 @@ fn update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version()
+         .chunks(menu.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("● update ready"));
++    assert!(text.contains("● 업데이트 준비됨"));
+     let update_row = state.hits.global_menu_rows[3].0;
+-    assert_eq!(update_row.width, 16);
++    assert_eq!(update_row.width, 19);
+     let menu_buffer = menu.to_ratatui_buffer().expect("menu buffer");
+     assert_eq!(
+         menu_buffer[(update_row.x + 1, update_row.y)].fg,
+@@ -746,21 +746,21 @@ fn update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version()
+     let bottom_row_start = usize::from(notes.width) * usize::from(notes.height - 1);
+     let bottom_row = notes.cells[bottom_row_start..]
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(!bottom_row.contains("NAVIGATE"));
++    assert!(!bottom_row.contains("이동"));
+     let text = notes
+         .cells
+         .chunks(notes.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+     assert!(text.contains("v0.8.3"));
+-    assert!(text.contains("update ready"));
++    assert!(text.contains("업데이트 준비됨"));
+     assert!(text.contains("detach, run herdr update"));
+     assert!(!state.hits.release_notes_scrollbar.is_empty());
+     let outer = crate::ui::centered_popup_rect(
+@@ -897,10 +897,10 @@ fn update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version()
+     let installed_text = installed
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(installed_text.contains("what's new"));
+-    assert!(!installed_text.contains("● what's new"));
++    assert!(installed_text.contains("새 소식"));
++    assert!(!installed_text.contains("● 새 소식"));
+ }
+ 
+ #[test]
+@@ -1048,28 +1048,28 @@ fn outdated_integration_badges_launcher_settings_and_settings_tab() {
+     let shell_text = shell
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(shell_text.contains("● menu"));
++    assert!(shell_text.contains("● 메뉴"));
+ 
+     state.toggle_global_menu();
+     let menu = state.compose(106, 30).expect("integration attention menu");
+     let menu_text = menu
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(menu_text.contains("● settings"));
+-    assert!(!menu_text.contains("update ready"));
++    assert!(menu_text.contains("● 설정"));
++    assert!(!menu_text.contains("업데이트 준비됨"));
+ 
+     state.activate_global_menu_item(0, &mut ClientShellInput::default());
+     let settings = state.compose(106, 30).expect("settings integration badge");
+     let settings_text = settings
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(settings_text.contains("● integrations"));
++    assert!(settings_text.contains("● 연동"));
+     let integrations_tab = state
+         .hits
+         .settings_tabs
+@@ -1110,10 +1110,10 @@ fn combined_update_and_integration_attention_preserves_both_badges() {
+     let text = menu
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    let settings = text.find("● settings").expect("settings badge");
+-    let update = text.find("● update ready").expect("update badge");
++    let settings = text.find("● 설정").expect("settings badge");
++    let update = text.find("● 업데이트 준비됨").expect("update badge");
+     assert!(settings < update);
+ 
+     state.overlay = None;
+@@ -1122,9 +1122,9 @@ fn combined_update_and_integration_attention_preserves_both_badges() {
+     let navigate_text = navigate
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(navigate_text.contains("update ready"));
++    assert!(navigate_text.contains("업데이트 준비됨"));
+ }
+ 
+ #[test]
+@@ -1146,9 +1146,9 @@ fn current_release_notes_use_whats_new_without_attention_badge() {
+     let text = menu
+         .cells
+         .iter()
+-        .map(|cell| cell.symbol.as_str())
++        .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+         .collect::<String>();
+-    assert!(text.contains("what's new"));
++    assert!(text.contains("새 소식"));
+ }
+ 
+ #[test]
+@@ -1241,13 +1241,13 @@ fn client_settings_preview_restore_and_endpoint_integrations_are_owned_by_overla
+         .chunks(frame.width as usize)
+         .map(|row| {
+             row.iter()
+-                .map(|cell| cell.symbol.as_str())
++                .scan(0, |skip, cell| Some(visible_cell_symbol(skip, cell)))
+                 .collect::<String>()
+         })
+         .collect::<Vec<_>>()
+         .join("\n");
+-    assert!(text.contains("update available"));
+-    assert!(text.contains("not found"));
++    assert!(text.contains("업데이트 가능"));
++    assert!(text.contains("찾을 수 없음"));
+     assert!(!text.contains("pane labels"));
+ 
+     let popup = state.hits.settings_popup;
+diff --git a/src/client/shell/worktree_overlays.rs b/src/client/shell/worktree_overlays.rs
+index 318c401..0973173 100644
+--- a/src/client/shell/worktree_overlays.rs
++++ b/src/client/shell/worktree_overlays.rs
+@@ -12,7 +12,7 @@ pub(super) fn render_worktree_create_overlay(
+         inner.x,
+         inner.y,
+         inner.width,
+-        "new worktree",
++        "새 워크트리",
+         Style::default()
+             .fg(p.text)
+             .bg(p.panel_bg)
+@@ -23,7 +23,7 @@ pub(super) fn render_worktree_create_overlay(
+         inner.x,
+         inner.y + 2,
+         inner.width,
+-        " branch",
++        " 브랜치",
+         Style::default().fg(p.overlay0).bg(p.panel_bg),
+     );
+     let input = Rect::new(inner.x, inner.y + 3, inner.width, 1);
+@@ -39,7 +39,7 @@ pub(super) fn render_worktree_create_overlay(
+         inner.x,
+         inner.y + 5,
+         inner.width,
+-        " checkout",
++        " 폴더",
+         Style::default().fg(p.overlay0).bg(p.panel_bg),
+     );
+     put_text(
+@@ -56,7 +56,7 @@ pub(super) fn render_worktree_create_overlay(
+             inner.x,
+             inner.y + 8,
+             inner.width,
+-            " creating…",
++            " 만드는 중…",
+             Style::default().fg(p.accent).bg(p.panel_bg),
+         );
+     } else if let Some(error) = create.error.as_deref() {
+@@ -76,7 +76,7 @@ pub(super) fn render_worktree_create_overlay(
+     button(
+         b,
+         *primary,
+-        " ↵ create and open ",
++        " ↵ 만들고 열기 ",
+         Style::default()
+             .fg(contrast(p))
+             .bg(p.accent)
+@@ -85,7 +85,7 @@ pub(super) fn render_worktree_create_overlay(
+     button(
+         b,
+         *cancel,
+-        " esc cancel ",
++        " esc 취소 ",
+         Style::default()
+             .fg(p.text)
+             .bg(p.surface0)
+@@ -119,7 +119,7 @@ pub(super) fn render_worktree_open_overlay(
+         inner.x,
+         inner.y,
+         inner.width,
+-        "open worktree",
++        "워크트리 열기",
+         Style::default()
+             .fg(p.text)
+             .bg(p.panel_bg)
+@@ -137,7 +137,7 @@ pub(super) fn render_worktree_open_overlay(
+         } else if !open.query.is_empty() {
+             format!(" / {}", open.query)
+         } else {
+-            " / filter worktrees".to_owned()
++            " / 워크트리 검색".to_owned()
+         },
+         Style::default()
+             .fg(if open.search_focused {
+@@ -148,9 +148,9 @@ pub(super) fn render_worktree_open_overlay(
+             .bg(p.panel_bg),
+     );
+     let count = if filtered.len() == open.entries.len() {
+-        format!("{} checkouts", open.entries.len())
++        format!("폴더 {}개", open.entries.len())
+     } else {
+-        format!("{}/{} checkouts", filtered.len(), open.entries.len())
++        format!("폴더 {}/{}개", filtered.len(), open.entries.len())
+     };
+     let cursor = if open.search_focused {
+         text_editor::render(
+@@ -245,7 +245,7 @@ pub(super) fn render_worktree_open_overlay(
+             body.x,
+             body.y,
+             body.width,
+-            " no matching worktrees",
++            " 일치하는 워크트리가 없습니다",
+             Style::default().fg(p.overlay0).bg(p.panel_bg),
+         );
+     }
+@@ -255,7 +255,7 @@ pub(super) fn render_worktree_open_overlay(
+             inner.x,
+             inner.bottom() - 3,
+             inner.width,
+-            " opening…",
++            " 여는 중…",
+             Style::default().fg(p.accent).bg(p.panel_bg),
+         );
+     } else if let Some(error) = open.error.as_deref() {
+@@ -275,7 +275,7 @@ pub(super) fn render_worktree_open_overlay(
+     button(
+         b,
+         *primary,
+-        " ↵ open ",
++        " ↵ 열기 ",
+         Style::default()
+             .fg(contrast(p))
+             .bg(p.accent)
+@@ -284,7 +284,7 @@ pub(super) fn render_worktree_open_overlay(
+     button(
+         b,
+         *cancel,
+-        " esc cancel ",
++        " esc 취소 ",
+         Style::default()
+             .fg(p.text)
+             .bg(p.surface0)
+@@ -317,7 +317,7 @@ pub(super) fn render_worktree_remove_overlay(
+         inner.x,
+         inner.y,
+         inner.width,
+-        " delete worktree checkout?",
++        " 워크트리 폴더를 삭제할까요?",
+         Style::default()
+             .fg(p.red)
+             .bg(p.panel_bg)
+@@ -328,7 +328,7 @@ pub(super) fn render_worktree_remove_overlay(
+         inner.x,
+         inner.y + 1,
+         inner.width,
+-        " This removes the checkout folder:",
++        " 다음 워크트리 폴더를 삭제합니다:",
+         Style::default().fg(p.text).bg(p.panel_bg),
+     );
+     put_text(
+@@ -344,7 +344,7 @@ pub(super) fn render_worktree_remove_overlay(
+         inner.x,
+         inner.y + 3,
+         inner.width,
+-        " The branch is not deleted. The Herdr workspace will close.",
++        " 브랜치는 유지되며 Herdr 작업공간은 닫힙니다.",
+         Style::default().fg(p.text).bg(p.panel_bg),
+     );
+     if remove.force_confirmation {
+@@ -353,7 +353,7 @@ pub(super) fn render_worktree_remove_overlay(
+             inner.x,
+             inner.y + 4,
+             inner.width,
+-            " Dirty or untracked files will be permanently deleted.",
++            " 수정한 파일과 미추적 파일도 영구 삭제됩니다.",
+             Style::default().fg(p.red).bg(p.panel_bg),
+         );
+     }
+@@ -363,7 +363,7 @@ pub(super) fn render_worktree_remove_overlay(
+             inner.x,
+             inner.y + 5,
+             inner.width,
+-            " removing…",
++            " 삭제 중…",
+             Style::default().fg(p.accent).bg(p.panel_bg),
+         );
+     } else if let Some(error) = remove.error.as_deref() {
+@@ -384,9 +384,9 @@ pub(super) fn render_worktree_remove_overlay(
+         b,
+         *primary,
+         if remove.force_confirmation {
+-            " ↵ delete anyway "
++            " ↵ 강제 삭제 "
+         } else {
+-            " ↵ remove "
++            " ↵ 삭제 "
+         },
+         Style::default()
+             .fg(contrast(p))
+@@ -396,7 +396,7 @@ pub(super) fn render_worktree_remove_overlay(
+     button(
+         b,
+         *cancel,
+-        " esc cancel ",
++        " esc 취소 ",
+         Style::default()
+             .fg(p.text)
+             .bg(p.surface0)
+diff --git a/src/input/keybind_help.rs b/src/input/keybind_help.rs
+index 8007948..6c14899 100644
+--- a/src/input/keybind_help.rs
++++ b/src/input/keybind_help.rs
+@@ -39,12 +39,12 @@ fn entry(key: impl Into<String>, label: &'static str) -> KeybindHelpEntry {
+ }
+ 
+ fn binding_label(bindings: &ActionKeybinds) -> String {
+-    bindings.label().unwrap_or_else(|| "unset".to_owned())
++    bindings.label().unwrap_or_else(|| "미지정".to_owned())
+ }
+ 
+ fn indexed_label(bindings: &[IndexedKeybind]) -> String {
+     if bindings.is_empty() {
+-        return "unset".to_owned();
++        return "미지정".to_owned();
+     }
+     let mut parts = Vec::new();
+     let mut index = 0;
+@@ -78,30 +78,30 @@ pub(crate) fn keybind_help_groups(
+ ) -> Vec<KeybindHelpGroup> {
+     let mut groups = vec![
+         (
+-            "global",
++            "공통",
+             vec![
+-                entry(crate::config::format_prefix_combos(prefixes), "prefix mode"),
+-                entry(binding_label(&keybinds.help), "keybinds"),
+-                entry(binding_label(&keybinds.settings), "settings"),
+-                entry(binding_label(&keybinds.detach), "detach"),
+-                entry(binding_label(&keybinds.reload_config), "reload config"),
++                entry(crate::config::format_prefix_combos(prefixes), "접두키 모드"),
++                entry(binding_label(&keybinds.help), "단축키"),
++                entry(binding_label(&keybinds.settings), "설정"),
++                entry(binding_label(&keybinds.detach), "연결 해제"),
++                entry(binding_label(&keybinds.reload_config), "설정 다시 읽기"),
+                 entry(
+                     binding_label(&keybinds.open_notification_target),
+-                    "open notification target",
++                    "알림 대상 열기",
+                 ),
+             ],
+         ),
+         (
+-            "navigation",
++            "이동",
+             vec![
+-                entry("esc", "back"),
++                entry("esc", "뒤로"),
+                 entry(
+                     format!(
+                         "{} / {}",
+                         binding_label(&keybinds.navigate.workspace_up),
+                         binding_label(&keybinds.navigate.workspace_down)
+                     ),
+-                    "workspace list",
++                    "작업공간 목록",
+                 ),
+                 entry(
+                     format!(
+@@ -111,104 +111,92 @@ pub(crate) fn keybind_help_groups(
+                         binding_label(&keybinds.navigate.pane_up),
+                         binding_label(&keybinds.navigate.pane_right)
+                     ),
+-                    "move focus",
++                    "선택 이동",
+                 ),
+-                entry("tab / shift+tab", "cycle pane"),
+-                entry("enter", "open workspace"),
+-                entry("1..9", "switch workspace"),
++                entry("tab / shift+tab", "창 순환"),
++                entry("enter", "작업공간 열기"),
++                entry("1..9", "작업공간 전환"),
+             ],
+         ),
+         (
+-            "workspaces / tabs",
++            "작업공간 / 탭",
+             vec![
+-                entry(
+-                    binding_label(&keybinds.workspace_picker),
+-                    "workspace navigation",
+-                ),
+-                entry(binding_label(&keybinds.goto), "session navigator"),
+-                entry(binding_label(&keybinds.new_workspace), "new workspace"),
+-                entry(binding_label(&keybinds.new_worktree), "new worktree"),
+-                entry(binding_label(&keybinds.open_worktree), "open worktree"),
++                entry(binding_label(&keybinds.workspace_picker), "작업공간 이동"),
++                entry(binding_label(&keybinds.goto), "세션 탐색"),
++                entry(binding_label(&keybinds.new_workspace), "새 작업공간"),
++                entry(binding_label(&keybinds.new_worktree), "새 워크트리"),
++                entry(binding_label(&keybinds.open_worktree), "워크트리 열기"),
+                 entry(
+                     binding_label(&keybinds.remove_worktree),
+-                    "delete worktree checkout",
++                    "워크트리 폴더 삭제",
+                 ),
+                 entry(
+                     binding_label(&keybinds.rename_workspace),
+-                    "rename workspace",
+-                ),
+-                entry(binding_label(&keybinds.close_workspace), "close workspace"),
+-                entry(
+-                    binding_label(&keybinds.previous_workspace),
+-                    "previous workspace",
++                    "작업공간 이름 변경",
+                 ),
+-                entry(binding_label(&keybinds.next_workspace), "next workspace"),
++                entry(binding_label(&keybinds.close_workspace), "작업공간 닫기"),
++                entry(binding_label(&keybinds.previous_workspace), "이전 작업공간"),
++                entry(binding_label(&keybinds.next_workspace), "다음 작업공간"),
+                 entry(
+                     indexed_label(&keybinds.switch_workspace),
+-                    "switch workspace 1-9",
++                    "작업공간 1-9 전환",
+                 ),
+-                entry(binding_label(&keybinds.previous_agent), "previous agent"),
+-                entry(binding_label(&keybinds.next_agent), "next agent"),
+-                entry(indexed_label(&keybinds.focus_agent), "focus agent 1-9"),
+-                entry(binding_label(&keybinds.new_tab), "new tab"),
+-                entry(binding_label(&keybinds.rename_tab), "rename tab"),
+-                entry(binding_label(&keybinds.previous_tab), "previous tab"),
+-                entry(binding_label(&keybinds.next_tab), "next tab"),
+-                entry(binding_label(&keybinds.move_tab_previous), "move tab left"),
+-                entry(binding_label(&keybinds.move_tab_next), "move tab right"),
+-                entry(indexed_label(&keybinds.switch_tab), "switch tab 1-9"),
+-                entry(binding_label(&keybinds.close_tab), "close tab"),
++                entry(binding_label(&keybinds.previous_agent), "이전 에이전트"),
++                entry(binding_label(&keybinds.next_agent), "다음 에이전트"),
++                entry(indexed_label(&keybinds.focus_agent), "에이전트 1-9 선택"),
++                entry(binding_label(&keybinds.new_tab), "새 탭"),
++                entry(binding_label(&keybinds.rename_tab), "탭 이름 변경"),
++                entry(binding_label(&keybinds.previous_tab), "이전 탭"),
++                entry(binding_label(&keybinds.next_tab), "다음 탭"),
++                entry(binding_label(&keybinds.move_tab_previous), "탭을 왼쪽으로"),
++                entry(binding_label(&keybinds.move_tab_next), "탭을 오른쪽으로"),
++                entry(indexed_label(&keybinds.switch_tab), "탭 1-9 전환"),
++                entry(binding_label(&keybinds.close_tab), "탭 닫기"),
+             ],
+         ),
+         (
+-            "panes",
++            "창",
+             vec![
+-                entry(binding_label(&keybinds.split_vertical), "split vertical"),
+-                entry(
+-                    binding_label(&keybinds.split_horizontal),
+-                    "split horizontal",
+-                ),
+-                entry(binding_label(&keybinds.close_pane), "close pane"),
+-                entry(binding_label(&keybinds.rename_pane), "rename pane"),
+-                entry(binding_label(&keybinds.edit_scrollback), "edit scrollback"),
+-                entry(binding_label(&keybinds.clear_pane), "clear pane"),
+-                entry(binding_label(&keybinds.copy_mode), "copy mode"),
+-                entry(binding_label(&keybinds.zoom), "zoom pane"),
+-                entry(binding_label(&keybinds.resize_mode), "resize mode"),
++                entry(binding_label(&keybinds.split_vertical), "좌우 분할"),
++                entry(binding_label(&keybinds.split_horizontal), "상하 분할"),
++                entry(binding_label(&keybinds.close_pane), "창 닫기"),
++                entry(binding_label(&keybinds.rename_pane), "창 이름 변경"),
++                entry(binding_label(&keybinds.edit_scrollback), "스크롤 기록 편집"),
++                entry(binding_label(&keybinds.clear_pane), "창 지우기"),
++                entry(binding_label(&keybinds.copy_mode), "복사 모드"),
++                entry(binding_label(&keybinds.zoom), "창 확대"),
++                entry(binding_label(&keybinds.resize_mode), "크기 조절 모드"),
+                 entry(
+                     binding_label(&keybinds.resize_pane_left),
+-                    "resize pane left",
++                    "창 왼쪽 크기 조절",
+                 ),
+                 entry(
+                     binding_label(&keybinds.resize_pane_down),
+-                    "resize pane down",
++                    "창 아래쪽 크기 조절",
+                 ),
+-                entry(binding_label(&keybinds.resize_pane_up), "resize pane up"),
++                entry(binding_label(&keybinds.resize_pane_up), "창 위쪽 크기 조절"),
+                 entry(
+                     binding_label(&keybinds.resize_pane_right),
+-                    "resize pane right",
++                    "창 오른쪽 크기 조절",
+                 ),
+-                entry(binding_label(&keybinds.toggle_sidebar), "toggle sidebar"),
+-                entry(binding_label(&keybinds.focus_pane_left), "focus pane left"),
+-                entry(binding_label(&keybinds.focus_pane_down), "focus pane down"),
+-                entry(binding_label(&keybinds.focus_pane_up), "focus pane up"),
+                 entry(
+-                    binding_label(&keybinds.focus_pane_right),
+-                    "focus pane right",
++                    binding_label(&keybinds.toggle_sidebar),
++                    "사이드바 표시 전환",
+                 ),
+-                entry(binding_label(&keybinds.cycle_pane_next), "cycle pane next"),
+-                entry(
+-                    binding_label(&keybinds.cycle_pane_previous),
+-                    "cycle pane previous",
+-                ),
+-                entry(binding_label(&keybinds.last_pane), "last pane"),
++                entry(binding_label(&keybinds.focus_pane_left), "왼쪽 창 선택"),
++                entry(binding_label(&keybinds.focus_pane_down), "아래 창 선택"),
++                entry(binding_label(&keybinds.focus_pane_up), "위 창 선택"),
++                entry(binding_label(&keybinds.focus_pane_right), "오른쪽 창 선택"),
++                entry(binding_label(&keybinds.cycle_pane_next), "다음 창 순환"),
++                entry(binding_label(&keybinds.cycle_pane_previous), "이전 창 순환"),
++                entry(binding_label(&keybinds.last_pane), "마지막 창"),
+             ],
+         ),
+     ];
+ 
+     if !keybinds.custom_commands.is_empty() {
+         groups.push((
+-            "custom",
++            "사용자 지정",
+             keybinds
+                 .custom_commands
+                 .iter()
+@@ -219,7 +207,7 @@ pub(crate) fn keybind_help_groups(
+                             .description
+                             .clone()
+                             .map(Cow::Owned)
+-                            .unwrap_or(Cow::Borrowed("custom command")),
++                            .unwrap_or(Cow::Borrowed("사용자 지정 명령")),
+                     )
+                 })
+                 .collect(),
+@@ -257,13 +245,10 @@ mod tests {
+     fn groups() -> Vec<KeybindHelpGroup> {
+         vec![
+             (
+-                "workspaces / tabs",
+-                vec![entry("w", "workspace navigation"), entry("c", "new tab")],
+-            ),
+-            (
+-                "panes",
+-                vec![entry("v", "split vertical"), entry("x", "close pane")],
++                "작업공간 / 탭",
++                vec![entry("w", "작업공간 이동"), entry("c", "새 탭")],
+             ),
++            ("창", vec![entry("v", "좌우 분할"), entry("x", "창 닫기")]),
+         ]
+     }
+ 
+@@ -291,14 +276,17 @@ mod tests {
+ 
+     #[test]
+     fn filter_matches_labels_and_shortcuts_case_insensitively() {
+-        let filtered = filter_keybind_help_groups(groups(), "WoRk");
++        let filtered = filter_keybind_help_groups(groups(), "작업공간");
+         assert_eq!(filtered.len(), 1);
+-        assert_eq!(filtered[0].1[0].1, "workspace navigation");
++        assert_eq!(filtered[0].1[0].1, "작업공간 이동");
+ 
+         let filtered = filter_keybind_help_groups(groups(), "x");
+         assert_eq!(filtered.len(), 1);
+-        assert_eq!(filtered[0].1[0].1, "close pane");
+-        assert!(filter_keybind_help_groups(groups(), "panes").is_empty());
++        assert_eq!(filtered[0].1[0].1, "창 닫기");
++        assert!(filter_keybind_help_groups(groups(), "작업공간 / 탭").is_empty());
++
++        let latin = vec![("custom", vec![entry("ctrl+x", "Open Editor")])];
++        assert_eq!(filter_keybind_help_groups(latin, "eDiToR").len(), 1);
+     }
+ 
+     #[test]
+@@ -312,6 +300,6 @@ mod tests {
+         );
+         let global = &groups[0].1;
+         assert_eq!(global[0].0, "ctrl+space / ctrl+s");
+-        assert_eq!(global[0].1, "prefix mode");
++        assert_eq!(global[0].1, "접두키 모드");
+     }
+ }
+diff --git a/src/ui/onboarding.rs b/src/ui/onboarding.rs
+index 148574d..d8c733b 100644
+--- a/src/ui/onboarding.rs
++++ b/src/ui/onboarding.rs
+@@ -1,17 +1,17 @@
+ use ratatui::layout::Rect;
+ 
+ pub(crate) const ONBOARDING_TITLE: &str = "  herdr";
+-pub(crate) const ONBOARDING_SUBTITLE: &str = "  terminal workspace manager for coding agents";
++pub(crate) const ONBOARDING_SUBTITLE: &str = "  코딩 에이전트를 위한 터미널 작업공간";
+ pub(crate) const ONBOARDING_DESCRIPTION: [&str; 3] = [
+-    "  this is a mouse-first terminal.",
+-    "  click the sidebar to switch workspaces, drag pane",
+-    "  borders to resize, right-click for context menus.",
++    "  마우스로 편리하게 조작하는 터미널입니다.",
++    "  사이드바로 작업공간 전환, 창 테두리 드래그로",
++    "  크기 조절, 우클릭으로 메뉴를 열 수 있습니다.",
+ ];
+-pub(crate) const ONBOARDING_PREFIX_SUFFIX: &str = " enters prefix mode · ";
++pub(crate) const ONBOARDING_PREFIX_SUFFIX: &str = " 접두키 모드 · ";
+ pub(crate) const ONBOARDING_HELP_LABEL: &str = "?";
+-pub(crate) const ONBOARDING_HELP_SUFFIX: &str = " shows keybinds and settings";
++pub(crate) const ONBOARDING_HELP_SUFFIX: &str = " 단축키와 설정 보기";
+ pub(crate) const ONBOARDING_NEXT: &str =
+-    "  next: install optional agent integrations for more reliable state";
++    "  다음: 정확한 상태 표시를 위해 에이전트 연동을 설치하세요";
+ 
+ pub(crate) fn onboarding_welcome_continue_rect(area: Rect) -> Rect {
+     super::widgets::continue_button_rect(area)
+diff --git a/src/ui/status.rs b/src/ui/status.rs
+index d8371cd..e08f1cb 100644
+--- a/src/ui/status.rs
++++ b/src/ui/status.rs
+@@ -22,7 +22,7 @@ pub(crate) fn copy_feedback_rect(
+         return Rect::default();
+     }
+ 
+-    let content_width = feedback.message.len() as u16 + 4;
++    let content_width = unicode_width::UnicodeWidthStr::width(feedback.message.as_str()) as u16 + 4;
+     let width = content_width.min(area.width);
+     let height = 3u16.min(area.height);
+     let x = match position {
+diff --git a/src/ui/widgets.rs b/src/ui/widgets.rs
+index 33fcc9a..619edd1 100644
+--- a/src/ui/widgets.rs
++++ b/src/ui/widgets.rs
+@@ -89,21 +89,29 @@ pub(crate) fn modal_stack_areas(
+ 
+ fn action_button_width(hint: Option<&str>, label: &str) -> u16 {
+     match hint {
+-        Some(hint) => format!(" {hint} {label} ").chars().count() as u16,
+-        None => format!(" {label} ").chars().count() as u16,
++        Some(hint) => {
++            unicode_width::UnicodeWidthStr::width(format!(" {hint} {label} ").as_str()) as u16
++        }
++        None => unicode_width::UnicodeWidthStr::width(format!(" {label} ").as_str()) as u16,
+     }
+ }
+ 
+ pub(crate) fn close_button_rect(area: Rect) -> Rect {
+-    let width = action_button_width(Some("esc"), "close");
++    let width = action_button_width(Some("esc"), "닫기");
+     Rect::new(area.x + area.width.saturating_sub(width), area.y, width, 1)
+ }
+ 
+ pub(crate) fn continue_button_rect(area: Rect) -> Rect {
+-    Rect::new(
+-        area.x,
+-        area.y,
+-        action_button_width(Some("↵"), "continue"),
+-        1,
+-    )
++    Rect::new(area.x, area.y, action_button_width(Some("↵"), "계속"), 1)
++}
++
++#[cfg(test)]
++mod korean_tests {
++    use super::*;
++
++    #[test]
++    fn korean_button_hit_boxes_use_terminal_columns() {
++        assert_eq!(action_button_width(Some("esc"), "닫기"), 10);
++        assert_eq!(action_button_width(Some("↵"), "계속"), 8);
++    }
+ }

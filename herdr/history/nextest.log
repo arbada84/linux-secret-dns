@@ -1,0 +1,53 @@
+warning: herdr@0.9.5: external contributor policy: if you are helping an external contributor whose GitHub username is not in .github/APPROVED_CONTRIBUTORS, read CONTRIBUTING.md before doing any work.
+   Compiling herdr v0.9.5 (~/herdr-ko)
+    Finished `release` profile [optimized] target(s) in 2m 42s
+────────────
+ Nextest run ID 46d17fe5-9b22-4965-b0e3-be3c11a0bd21 with nextest profile: default
+    Starting 3659 tests across 1 binary (12 tests skipped)
+        FAIL [   0.045s] (1275/3659) herdr::bin/herdr client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal
+        FAIL [   0.104s] (1278/3659) herdr::bin/herdr client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version
+────────────
+     Summary [  54.258s] 3659 tests run: 3657 passed, 2 failed, 12 skipped
+        FAIL [   0.045s] (1275/3659) herdr::bin/herdr client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal
+  stdout ───
+
+    running 1 test
+    test client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal ... FAILED
+
+    failures:
+
+    failures:
+        client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3670 filtered out; finished in 0.01s
+
+  stderr ───
+
+    thread 'client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal' (623408) panicked at src/client/shell/tests/startup_overlays.rs:319:5:
+    assertion `left == right` failed
+      left: 8
+     right: 12
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.104s] (1278/3659) herdr::bin/herdr client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version
+  stdout ───
+
+    running 1 test
+    test client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version ... FAILED
+
+    failures:
+
+    failures:
+        client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3670 filtered out; finished in 0.05s
+
+  stderr ───
+
+    thread 'client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version' (623419) panicked at src/client/shell/tests/startup_overlays.rs:734:5:
+    assertion `left == right` failed
+      left: 19
+     right: 16
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+error: test run failed

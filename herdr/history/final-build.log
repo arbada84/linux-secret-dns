@@ -1,0 +1,4 @@
+    Blocking waiting for file lock on build directory
+warning: herdr@0.9.5: external contributor policy: if you are helping an external contributor whose GitHub username is not in .github/APPROVED_CONTRIBUTORS, read CONTRIBUTING.md before doing any work.
+   Compiling herdr v0.9.5 (~/herdr-ko)
+    Finished `release` profile [optimized] target(s) in 10m 06s

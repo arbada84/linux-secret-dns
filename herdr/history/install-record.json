@@ -1,0 +1,29 @@
+{
+  "installed_at": "2026-11-06T02:02:47.984395+09:00",
+  "kind": "local Korean UI build",
+  "base_version": "0.9.5",
+  "source_commit": "2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01",
+  "source": "https://github.com/herdrdev/herdr/tree/v0.9.5",
+  "source_path": "~/herdr-ko",
+  "binary": "~/.local/bin/herdr",
+  "sha256": "7658b00ceabdbff3991edb7a2fd6ff3dbf834c3c829e80d4cee359fc8d1bd25d",
+  "original_backup": "~/.local/share/herdr-ko/herdr-0.9.5-original",
+  "original_sha256": "14d9e8bc8b4a9e0118d77c32266f76d461f09b40342eb23752960bd89f59929d",
+  "protocol": 22,
+  "endpoint_generation": 1,
+  "validation": {
+    "native_unit_passed": 3657,
+    "corrected_width_tests_rechecked_and_passed": 2,
+    "native_unit_skipped": 12,
+    "logs": [
+      "~/herdr-ko/.local/nextest.log",
+      "~/herdr-ko/.local/retest.log"
+    ],
+    "installed_korean_headers_settings_and_buttons_verified": true,
+    "original_server_and_shell_preserved": true
+  },
+  "limitations": [
+    "CLI help and some server messages remain English",
+    "Official updates can replace this local Korean build"
+  ]
+}

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Herdr
+Name[ko]=Herdr 터미널 작업공간
+Comment=Terminal workspace manager for AI agents
+Exec=herdr
+TryExec=herdr
+Icon=utilities-terminal
+Terminal=true
+Categories=System;TerminalEmulator;
