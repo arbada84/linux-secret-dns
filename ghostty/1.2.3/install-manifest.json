@@ -1,0 +1,21 @@
+{
+  "version": "1.2.3",
+  "package_source": "https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.2.3-0-ppa1/ghostty_1.2.3-0.ppa1_amd64_24.04.deb",
+  "package_sha256": "99eadff67bf1d5883655dd77eead3256ace3b29a8b77973a2e217a8ebb412609",
+  "binary": "~/.local/opt/ghostty-1.2.3/usr/bin/ghostty",
+  "launcher": "~/.local/bin/herdr-ghostty-ko",
+  "desktop_entry": "~/.local/share/applications/herdr-ghostty-ko.desktop",
+  "isolated_ghostty_config": "~/.local/share/ghostty-1.2.3/config",
+  "child_herdr_uses_original_config": true,
+  "original_files_preserved": {
+    "/usr/bin/ghostty": "c42823821ede0d5aeb77db446bdbea7f1fbfcdbedd77efbde43dea5ec66a697b",
+    "~/.config/ghostty/config.ghostty": "18471b78deec5f8c12d2c034e1c13d751862445d4127ed052532c198f4d5036f",
+    "~/.local/share/applications/herdr.desktop": "db412b8d7d316a1be216dd24f018052d46df626ea4c49932e0ab96b26db41043"
+  },
+  "user_input_test": {
+    "matches": true,
+    "normalized_length": 9,
+    "expected_length": 9
+  },
+  "archive_note": "Paths generalized; historical input result, not a current live test."
+}

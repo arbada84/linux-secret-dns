@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Herdr (GNOME Terminal)
+Name[ko]=Herdr (기본 터미널)
+Comment=Open the existing Herdr session in GNOME Terminal
+Comment[ko]=기본 터미널로 기존 Herdr 세션에 접속
+Exec=/usr/bin/gnome-terminal -- /home/USER/.local/bin/herdr
+TryExec=/usr/bin/gnome-terminal
+Icon=utilities-terminal
+Terminal=false
+Categories=System;TerminalEmulator;
+StartupNotify=true

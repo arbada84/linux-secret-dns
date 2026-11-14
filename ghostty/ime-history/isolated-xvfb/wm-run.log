@@ -1,0 +1,31 @@
+GNOME_KEYRING_CONTROL=/run/user/1000/keyring
+SSH_AUTH_SOCK=/run/user/1000/keyring/ssh
+[{"module": "fcitx", "status": "window_not_created", "exit": null}]
+dbus-daemon[648138]: [session uid=1000 pid=648138] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=648150 comm="fcitx5" label="unconfined")
+dbus-daemon[648138]: [session uid=1000 pid=648138] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.6' (uid=1000 pid=648161 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+dbus-daemon[648138]: [session uid=1000 pid=648138] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[648138]: [session uid=1000 pid=648138] Activating service name='org.freedesktop.portal.Documents' requested by ':1.6' (uid=1000 pid=648161 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+dbus-daemon[648138]: [session uid=1000 pid=648138] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+dbus-daemon[648138]: [session uid=1000 pid=648138] Activating service name='org.freedesktop.impl.portal.desktop.xapp' requested by ':1.6' (uid=1000 pid=648161 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+dbus-daemon[648138]: [session uid=1000 pid=648138] Activating service name='org.gtk.vfs.Daemon' requested by ':1.9' (uid=1000 pid=648200 comm="/usr/libexec/xdg-desktop-portal-xapp" label="unconfined")
+dbus-daemon[648138]: [session uid=1000 pid=648138] Successfully activated service 'org.gtk.vfs.Daemon'
+fusermount3: failed to access mountpoint /run/user/1000/gvfs: Permission denied
+dbus-daemon[648138]: [session uid=1000 pid=648138] Successfully activated service 'org.freedesktop.impl.portal.desktop.xapp'
+dbus-daemon[648138]: [session uid=1000 pid=648138] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.6' (uid=1000 pid=648161 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+dbus-daemon[648138]: [session uid=1000 pid=648138] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+dbus-daemon[648138]: [session uid=1000 pid=648138] Activating service name='org.freedesktop.secrets' requested by ':1.6' (uid=1000 pid=648161 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+
+(/usr/libexec/xdg-desktop-portal:648161): xdg-desktop-portal-WARNING **: 17:12:04.205: Failed to create secret proxy: Error calling StartServiceByName for org.freedesktop.secrets: The connection is closed
+
+(/usr/libexec/xdg-desktop-portal:648161): xdg-desktop-portal-WARNING **: 17:12:04.205: No skeleton to export
+A connection to the bus can't be made
+
+(/usr/libexec/xdg-desktop-portal:648161): GLib-GIO-CRITICAL **: 17:12:04.205: Error while sending AddMatch() message: The connection is closed
+
+(/usr/libexec/xdg-desktop-portal:648161): GLib-GIO-CRITICAL **: 17:12:04.205: Error while sending AddMatch() message: The connection is closed
+
+(/usr/libexec/xdg-desktop-portal:648161): xdg-desktop-portal-WARNING **: 17:12:04.205: Failed to create dynamic_launcher proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.gtk: The connection is closed
+
+(/usr/libexec/xdg-desktop-portal:648161): xdg-desktop-portal-WARNING **: 17:12:04.205: No skeleton to export

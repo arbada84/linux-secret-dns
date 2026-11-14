@@ -1,0 +1,13 @@
+Xlib:  extension "DPMS" missing on display ":1".
+
+(muffin:648151): muffin-WARNING **: 17:11:46.333: Failed to use linear monitor configuration: Invalid mode 1280x800 (-nan) for monitor 'unknown unknown'
+
+(muffin:648151): muffin-WARNING **: 17:11:46.333: Failed to use fallback monitor configuration: Invalid mode 1280x800 (-nan) for monitor 'unknown unknown'
+Xlib:  extension "DPMS" missing on display ":1".
+
+(muffin:648151): muffin-WARNING **: 17:11:46.393: Failed to use linear monitor configuration: Invalid mode 1280x800 (-nan) for monitor 'unknown unknown'
+
+(muffin:648151): muffin-WARNING **: 17:11:46.393: Failed to use fallback monitor configuration: Invalid mode 1280x800 (-nan) for monitor 'unknown unknown'
+
+(muffin:648151): muffin-WARNING **: 17:11:46.393: Impossible to set scaling on crtc 59 to 1.000000, error id 2
+Xlib:  extension "DPMS" missing on display ":1".

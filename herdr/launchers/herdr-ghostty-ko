@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+exec /usr/bin/env -u FCITX_NO_PREEDIT_APPS \
+    GTK_IM_MODULE=fcitx \
+    XDG_CONFIG_HOME="${HOME}"/.local/share/ghostty-1.2.3/config \
+    GHOSTTY_RESOURCES_DIR="${HOME}"/.local/opt/ghostty-1.2.3/usr/share/ghostty \
+    "${HOME}"/.local/opt/ghostty-1.2.3/usr/bin/ghostty \
+    --gtk-single-instance=false --title='Herdr · Ghostty 1.2.3' \
+    -e /usr/bin/env -u XDG_CONFIG_HOME -u GHOSTTY_RESOURCES_DIR \
+    "${HOME}"/.local/bin/herdr

@@ -9,7 +9,8 @@
 | 배포판 | Linux Mint 22.3 Zena, Ubuntu Noble 기반 |
 | Herdr | 0.9.5 비공식 한국어 UI 빌드 |
 | Herdr 사용자 설정 | `~/.config/herdr/config.toml`의 `onboarding = false` |
-| Ghostty | 1.3.1, 설치 패키지 `1.3.1-0~ppa2`, GTK 런타임 |
+| 시스템 Ghostty | 1.3.1, 설치 패키지 `1.3.1-0~ppa2`, GTK 런타임 |
+| Herdr 입력용 별도 Ghostty | 1.2.3, 사용자 전용 경로. [후속 구성](../ghostty/1.2.3/README.md) |
 | Ghostty 언어 | `~/.config/ghostty/config.ghostty`의 `language = ko_KR` |
 | 기본 터미널 alternative | `/usr/bin/gnome-terminal.wrapper` |
 | `LANG` / `LANGUAGE` | `ko_KR.UTF-8` / `ko` |
@@ -77,3 +78,5 @@ Herdr 패치와 해시는 [Herdr 기록](../herdr/README.md), 새 장치의 빌�
 - [Ghostty language 설정](https://ghostty.org/docs/config/reference#language)
 - [Herdr 원본 v0.9.5](https://github.com/herdrdev/herdr/tree/v0.9.5)
 - [Herdr 설치 기록과 검증 범위](../herdr/manifest.json)
+
+Herdr 실행 아이콘은 기본 터미널용, GNOME Terminal 전용, Ghostty 1.2.3 입력용으로 나뉩니다. 실제 경로를 일반화한 템플릿은 [실행기 폴더](../herdr/launchers/)에 있습니다.

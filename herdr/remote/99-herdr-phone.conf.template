@@ -1,0 +1,10 @@
+# Herdr terminal access from the owner's Fold7 Tailscale address only.
+AllowUsers USER@PHONE_TAILSCALE_IP
+
+Match User USER Address PHONE_TAILSCALE_IP
+    PasswordAuthentication yes
+    AuthenticationMethods password
+    PermitTTY yes
+    DisableForwarding yes
+
+Match all

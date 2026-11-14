@@ -1,0 +1,26 @@
+info: ghostty version=1.2.3
+info: ghostty build optimize=ReleaseFast
+info: runtime=apprt.Runtime.gtk
+info: font_backend=font.main.Backend.fontconfig_freetype
+info: dependency harfbuzz=8.3.0
+info: dependency fontconfig=21500
+info: renderer=renderer.generic.Renderer(renderer.OpenGL)
+info: libxev default backend=io_uring
+info(os_locale): setlocale from env result=C.UTF-8
+info(gtk): GTK version build=4.14.5 runtime=4.14.5
+info(gtk): libadwaita version build=1.5.0 runtime=1.5.0
+info(config): creating template config file: path=/tmp/ghostty-123-compare-oeg_h1_z/config/ghostty/config
+info(config): default shell source=env value=/bin/bash
+warning(gtk_ghostty_application): setting GDK_DEBUG=gl-disable-gles,gl-no-fractional,vulkan-disable
+warning(gtk_ghostty_application): setting GDK_DISABLE=color-mgmt
+info(gtk_ghostty_application): cgroup isolation disabled via config=config.Config.LinuxCgroup.single-instance
+info(opengl): loaded OpenGL 4.6
+info(io_exec): found Ghostty resources dir: /tmp/ghostty-123-compare-oeg_h1_z/unpacked/usr/share/ghostty
+warning(io_exec): shell could not be detected, no automatic shell integration will be injected
+warning(gtk_ghostty_application): unimplemented action=apprt.action.Action.Key.cell_size
+info(io_exec): started subcommand path=/usr/bin/python3 pid=648712
+info(io_exec): subcommand cgroup=-
+info(font_codepoint_resolver): found codepoint 0xD55C in fallback face=Noto Sans CJK JP
+warning(gtk_ghostty_surface): failed to activate the on-screen keyboard
+info(io_exec): pty fd closed, read thread exiting
+info(surface): surface closed addr=5fc3f1716f90

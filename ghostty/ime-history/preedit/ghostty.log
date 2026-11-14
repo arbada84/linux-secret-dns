@@ -1,0 +1,24 @@
+info: ghostty version=1.3.1
+info: ghostty build optimize=ReleaseFast
+info: runtime=.gtk
+info: font_backend=.fontconfig_freetype
+info: dependency harfbuzz=8.3.0
+info: dependency fontconfig=21500
+info: renderer=renderer.generic.Renderer(renderer.OpenGL)
+info: libxev default backend=io_uring
+info(os_locale): setlocale from env result=C.UTF-8
+info(gtk): GTK version build=4.14.5 runtime=4.14.5
+info(gtk): libadwaita version build=1.5.0 runtime=1.5.0
+info: reading configuration file path=~/.config/ghostty/config.ghostty
+info(config): default shell source=env value=/bin/bash
+warning(gtk_ghostty_application): setting GDK_DEBUG=gl-disable-gles,gl-no-fractional,vulkan-disable
+warning(gtk_ghostty_application): setting GDK_DISABLE=color-mgmt
+warning(glib): WARNING: Gtk: Theme parser error: style.css:140:17-19: Unexpected data at end of hsl() argument
+info(opengl): loaded OpenGL 4.6
+info(io_exec): found Ghostty resources dir: /usr/share/ghostty
+warning(io_exec): shell could not be detected, no automatic shell integration will be injected
+warning(gtk_ghostty_application): unimplemented action=.cell_size
+info(io_exec): started subcommand path=/usr/bin/python3 pid=472291
+info(font_codepoint_resolver): found codepoint 0xD55C in fallback face=Noto Sans CJK JP
+info(io_exec): pty fd closed, read thread exiting
+info(surface): surface closed addr=56cdd70716d0

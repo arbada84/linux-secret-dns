@@ -1,0 +1,50 @@
+{
+  "phone": [
+    "passwordauthentication yes",
+    "permittty yes",
+    "disableforwarding yes",
+    "forcecommand none",
+    "allowusers REVERSE_ACCOUNT",
+    "allowusers HISTORY_SYNC_ACCOUNT",
+    "allowusers HISTORY_SYNC_MINT_ACCOUNT",
+    "allowusers USER@127.0.0.1",
+    "allowusers USER@PHONE_TAILSCALE_IP",
+    "authenticationmethods password"
+  ],
+  "other_phone": [
+    "passwordauthentication no",
+    "permittty yes",
+    "disableforwarding no",
+    "forcecommand none",
+    "allowusers REVERSE_ACCOUNT",
+    "allowusers HISTORY_SYNC_ACCOUNT",
+    "allowusers HISTORY_SYNC_MINT_ACCOUNT",
+    "allowusers USER@127.0.0.1",
+    "allowusers USER@PHONE_TAILSCALE_IP",
+    "authenticationmethods any"
+  ],
+  "local_sync": [
+    "passwordauthentication no",
+    "permittty no",
+    "disableforwarding no",
+    "forcecommand /usr/local/bin/HISTORY_SYNC_MINT_ACCOUNT-ssh",
+    "allowusers REVERSE_ACCOUNT",
+    "allowusers HISTORY_SYNC_ACCOUNT",
+    "allowusers HISTORY_SYNC_MINT_ACCOUNT",
+    "allowusers USER@127.0.0.1",
+    "allowusers USER@PHONE_TAILSCALE_IP",
+    "authenticationmethods publickey"
+  ],
+  "reverse": [
+    "passwordauthentication no",
+    "permittty no",
+    "disableforwarding no",
+    "forcecommand /usr/bin/sleep infinity",
+    "allowusers REVERSE_ACCOUNT",
+    "allowusers HISTORY_SYNC_ACCOUNT",
+    "allowusers HISTORY_SYNC_MINT_ACCOUNT",
+    "allowusers USER@127.0.0.1",
+    "allowusers USER@PHONE_TAILSCALE_IP",
+    "authenticationmethods publickey"
+  ]
+}

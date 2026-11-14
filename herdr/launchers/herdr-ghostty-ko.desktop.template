@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Herdr (Ghostty 1.2.3)
+Name[ko]=Herdr (Ghostty 한글 입력)
+Comment=Open the existing Herdr session with the separately tested Ghostty 1.2.3
+Exec=/home/USER/.local/bin/herdr-ghostty-ko
+TryExec=/home/USER/.local/bin/herdr-ghostty-ko
+Icon=utilities-terminal
+Terminal=false
+Categories=System;TerminalEmulator;
+StartupNotify=true

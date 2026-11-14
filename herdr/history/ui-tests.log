@@ -1,0 +1,556 @@
+warning: herdr@0.9.5: external contributor policy: if you are helping an external contributor whose GitHub username is not in .github/APPROVED_CONTRIBUTORS, read CONTRIBUTING.md before doing any work.
+   Compiling herdr v0.9.5 (~/herdr-ko)
+    Finished `release` profile [optimized] target(s) in 2m 43s
+     Running unittests src/main.rs (target/release/deps/herdr-6870fe4eea0045e5)
+
+running 383 tests
+test client::shell::config::tests::live_reload_preserves_invalid_client_owned_sections ... ok
+test client::shell::config::tests::initial_surface_size_uses_persisted_endpoint_chrome ... ok
+test client::shell::endpoint_agent_state::tests::clients_acknowledge_the_same_endpoint_completion_independently ... ok
+test client::shell::endpoint_agent_state::tests::coherent_presented_surface_acknowledges_completion ... ok
+test client::shell::endpoint_agent_state::tests::completion_guard_companion_is_scoped_to_boot_revision_and_connection ... ok
+test client::shell::config::tests::live_reload_applies_client_owned_sections ... ok
+test client::shell::endpoint_agent_state::tests::completion_guard_initial_unknown_to_idle_does_not_project_done ... ok
+test client::shell::endpoint_agent_state::tests::completion_guard_distinguishes_coalesced_work_from_rebind ... ok
+test client::shell::endpoint_agent_state::tests::completion_guard_new_boot_baselines_existing_completions ... ok
+test client::shell::endpoint_agent_state::tests::completion_guard_new_idle_agent_is_not_completed_work ... ok
+test client::shell::endpoint_agent_state::tests::completion_guard_server_suppression_overrides_client_observed_work ... ok
+test client::shell::endpoint_agent_state::tests::completion_guard_startup_blocker_does_not_project_done ... ok
+test client::shell::endpoint_agent_state::tests::completion_guard_session_rebind_does_not_project_done ... ok
+test client::shell::endpoint_agent_state::tests::first_snapshot_establishes_an_idle_baseline_without_server_seen_authority ... ok
+test client::shell::endpoint_agent_state::tests::unpresented_working_completion_projects_done ... ok
+test client::shell::endpoint_agent_state::tests::stale_or_unfocused_surface_does_not_acknowledge_completion ... ok
+test client::shell::notifications::tests::concurrent_endpoint_notifications_are_queued_in_arrival_order ... ok
+test client::shell::notifications::tests::finished_hint_waits_for_the_projected_completion_snapshot ... ok
+test client::shell::notifications::tests::immediate_finished_evidence_for_acknowledged_idle_never_toasts_or_sounds ... ok
+test client::shell::notifications::tests::notification_rect_stays_inside_short_nonzero_area ... ok
+test client::shell::notifications::tests::mobile_notification_is_a_bottom_banner_with_released_title ... ok
+test client::shell::notifications::tests::retiring_one_endpoint_preserves_other_endpoint_notifications ... ok
+test client::shell::preferences::tests::endpoint_paths_are_stable_and_distinct ... ok
+test client::shell::preferences::tests::legacy_preferences_default_remote_collapses ... ok
+test client::shell::preferences::tests::remote_preferences_distinguish_targets_sessions_and_component_boundaries ... ok
+test client::shell::notifications::tests::unavailable_notification_target_stays_visible_and_reports_the_machine ... ok
+test client::shell::preferences::tests::concurrent_stores_leave_complete_preferences ... ok
+test client::shell::render::tabs::tests::trailing_scroll_limit_accounts_for_full_widths_and_separators ... ok
+test client::shell::preferences::tests::repeated_store_replaces_existing_preferences ... ok
+test client::shell::scroll::tests::list_metrics_preserve_variable_rows_and_caller_owned_gap_policy ... ok
+test client::shell::tests::agents_worktrees_notifications::active_agent_view_controls_sidebar_order_and_focus_indices ... ok
+test client::shell::tests::agents_worktrees_notifications::agent_sort_toggle_is_client_local_and_persists_per_endpoint ... ok
+test client::shell::tests::agents_worktrees_notifications::collapsed_workspace_jitter_remains_a_click ... ok
+test client::shell::tests::agents_worktrees_notifications::agent_sidebar_honors_priority_symbols_tokens_and_stable_hits ... ok
+test client::shell::tests::agents_worktrees_notifications::duplicate_repo_parent_drag_does_not_target_its_own_move_block ... ok
+test client::shell::tests::agents_worktrees_notifications::desktop_workspace_navigation_reveals_overflowing_selection ... ok
+test client::shell::tests::agents_worktrees_notifications::grouped_worktrees_render_parent_branch_and_indented_child ... ok
+test client::shell::tests::agents_worktrees_notifications::mouse_hits_use_stable_workspace_tab_and_pane_ids ... ok
+test client::shell::tests::agents_worktrees_notifications::named_workspace_overlay_targets_projected_source_workspace ... ok
+test client::shell::tests::agents_worktrees_notifications::duplicate_repo_parents_remain_visible_and_focusable_when_collapsed ... ok
+test client::shell::tests::agents_worktrees_notifications::muted_agent_sidebar_rows_do_not_stack_terminal_faint ... ok
+test client::shell::tests::agents_worktrees_notifications::navigate_mode_selects_workspace_locally_then_focuses_by_stable_id ... ok
+test client::shell::tests::agents_worktrees_notifications::pane_cycle_last_and_agent_actions_resolve_to_stable_pane_ids ... ok
+test client::shell::tests::agents_worktrees_notifications::workspace_actions_preserve_selected_target_and_client_confirmation ... ok
+test client::shell::tests::agents_worktrees_notifications::unavailable_worktree_create_does_not_wedge_the_overlay ... ok
+test client::shell::tests::agents_worktrees_notifications::semantic_notifications_use_client_policy_and_stable_navigation_targets ... ok
+test client::shell::tests::agents_worktrees_notifications::workspace_click_waits_for_release_and_drag_reorders_by_stable_id ... ok
+test client::shell::tests::agents_worktrees_notifications::workspace_drag_moves_parent_worktree_as_one_block_and_rejects_child ... ok
+test client::shell::tests::agents_worktrees_notifications::worktree_action_errors_expire_without_more_input ... ok
+test client::shell::tests::agents_worktrees_notifications::workspace_state_text_does_not_stack_terminal_faint ... ok
+test client::shell::tests::agents_worktrees_notifications::worktree_prepare_rejection_notice_expires ... ok
+test client::shell::tests::agents_worktrees_notifications::worktree_create_previews_the_endpoint_owned_checkout_path ... ok
+test client::shell::tests::agents_worktrees_notifications::worktree_open_filters_and_clicks_a_stable_public_entry ... ok
+test client::shell::tests::chrome_context::close_confirmation_error_becomes_client_owned_overlay_and_stable_workspace_close ... ok
+test client::shell::tests::chrome_context::client_owned_sidebar_dividers_resize_live ... ok
+test client::shell::tests::agents_worktrees_notifications::worktree_remove_escalates_recoverable_failure_to_force_confirmation ... ok
+test client::shell::tests::chrome_context::context_menus_capture_stable_targets_and_route_actions ... ok
+test client::shell::tests::chrome_context::focused_workspace_change_reveals_new_workspace_in_full_sidebar ... ok
+test client::shell::tests::chrome_context::focused_last_overflow_tab_shows_its_full_label ... ok
+test client::shell::tests::chrome_context::global_menu_opens_from_sidebar_and_routes_client_actions ... ok
+test client::shell::tests::chrome_context::new_tab_overlay_owns_text_cursor_and_submits_public_api_request ... ok
+test client::shell::tests::chrome_context::tab_overflow_controls_scroll_the_client_owned_tab_bar ... ok
+test client::shell::tests::close_pane::last_pane_close_preserves_parent_group_and_linked_workspace_scope ... ok
+test client::shell::tests::close_pane::last_pane_confirmation_preserves_target_across_focus_changes_and_new_tabs ... ok
+test client::shell::tests::close_pane::last_pane_close_confirmation_can_be_cancelled ... ok
+test client::shell::tests::close_pane::last_pane_close_waits_for_keyboard_or_mouse_confirmation ... ok
+test client::shell::tests::close_pane::ordinary_pane_close_stays_immediate_with_another_pane ... ok
+test client::shell::tests::close_pane::last_pane_confirmation_rejects_missing_moved_or_reconnected_targets ... ok
+test client::shell::tests::close_tab::last_tab_close_preserves_parent_group_and_linked_workspace_scope ... ok
+test client::shell::tests::close_tab::last_tab_close_confirmation_can_be_cancelled ... ok
+test client::shell::tests::close_tab::last_tab_confirmation_preserves_target_across_focus_changes_and_new_tabs ... ok
+test client::shell::tests::close_tab::last_tab_confirmation_rejects_missing_moved_or_reconnected_targets ... ok
+test client::shell::tests::close_tab::last_tab_close_waits_for_keyboard_or_mouse_confirmation ... ok
+test client::shell::tests::close_pane::pane_close_stays_immediate_with_confirmation_disabled_or_other_tabs ... ok
+test client::shell::tests::copy::client_mouse_selection_highlights_and_copies_through_endpoint_extraction ... FAILED
+test client::shell::tests::copy::clipboard_feedback_is_client_local_and_respects_config ... FAILED
+test client::shell::tests::copy::copy_mode_repeat_during_projection_gap_stays_active ... ok
+test client::shell::tests::copy::copy_mode_survives_mouse_motion_and_parks_across_focus_changes ... ok
+test client::shell::tests::close_tab::tab_close_stays_immediate_with_confirmation_disabled_or_other_tabs ... ok
+test client::shell::tests::copy::copy_search_owns_prompt_repeat_highlights_selection_and_restore ... ok
+test client::shell::tests::copy::empty_keyboard_anchor_keeps_search_fallback_revision_guard ... ok
+test client::shell::tests::copy::copy_waits_for_endpoint_motion_before_copying_selection ... ok
+test client::shell::tests::copy::client_selection_uses_host_background_and_repaints_when_it_changes ... ok
+test client::shell::tests::copy::keyboard_copy_mode_content_motion_is_endpoint_backed_and_stale_safe ... ok
+test client::shell::tests::copy::keyboard_copy_mode_owns_cursor_selection_copy_and_scroll_restore ... ok
+test client::shell::tests::copy::navigator_distinguishes_unnamed_terminals_on_numbered_tabs ... ok
+test client::shell::tests::copy::navigator_grouping_keeps_snapshot_order_with_interleaved_tabs_and_panes ... ok
+test client::shell::tests::copy::keyboard_selections_survive_output_and_copy_live_ranges ... ok
+test client::shell::tests::copy::navigator_keeps_empty_workspaces_searchable_without_status_filters ... ok
+test client::shell::tests::copy::navigator_horizontal_arrows_jump_sections_but_edit_the_search_cursor ... ok
+test client::shell::tests::copy::keyboard_selection_does_not_return_after_resize_or_screen_switch ... ok
+test client::shell::tests::copy::navigator_render_scale_profile ... ignored, manual navigator composition scaling profile
+test client::shell::tests::copy::navigator_narrow_layout_and_long_search_stay_inside_the_popup ... ok
+test client::shell::tests::copy::navigator_owns_search_mouse_selection_and_stable_target_focus ... ok
+test client::shell::tests::copy::navigator_search_matches_non_adjacent_words_without_losing_the_pane_target ... ok
+test client::shell::tests::copy::navigator_renders_every_terminal_in_workspace_sections ... ok
+test client::shell::tests::copy::navigator_searches_ancestor_context_and_keeps_split_agents_individually_actionable ... ok
+test client::shell::tests::copy::new_content_revision_invalidates_copy_search_coordinates ... ok
+test client::shell::tests::copy::navigator_workspace_headings_use_the_active_themes_primary_text ... ok
+test client::shell::tests::copy::pasted_help_and_copy_queries_normalize_single_line_text ... ok
+test client::shell::tests::copy::rapid_copy_motions_are_chained_from_the_previous_result ... ok
+test client::shell::tests::copy::queued_copy_keys_preserve_prefix_order ... ok
+test client::shell::tests::copy::reentering_copy_mode_on_the_same_pane_is_a_no_op ... ok
+test client::shell::tests::copy::retained_mouse_selection_survives_output_and_copies_without_terminal_input ... ok
+test client::shell::tests::copy::retained_selection_copy_suppresses_key_repeats ... ok
+test client::shell::tests::copy::selection_edge_drag_requests_scroll_and_timer_continues_it ... ok
+test client::shell::tests::copy::word_selection_result_survives_focus_snapshot_lag ... ok
+test client::shell::tests::endpoint_requests::another_machine_disconnect_does_not_cancel_active_popup ... ok
+test client::shell::tests::endpoint_requests::cancelled_integration_install_does_not_queue_a_refresh ... ok
+test client::shell::tests::copy::navigator_scrollbar_click_and_drag_scroll_without_opening_a_destination ... ok
+test client::shell::tests::endpoint_requests::cancelled_link_activation_does_not_replay_mouse_input ... ok
+test client::shell::tests::endpoint_requests::cancelling_popup_request_unblocks_input_and_ignores_late_success ... ok
+test client::shell::tests::endpoint_requests::disconnect_cancels_worktree_dialog_before_same_server_reconnect ... ok
+test client::shell::tests::endpoint_requests::failed_selection_copy_does_not_send_terminal_input ... ok
+test client::shell::tests::endpoint_requests::local_selection_is_scheduled_ahead_of_a_full_event_queue ... ok
+test client::shell::tests::endpoint_requests::stale_queued_request_is_cancelled_without_blocking_the_current_generation ... ok
+test client::shell::tests::endpoint_requests::dispatcher_cancels_worktree_requests_on_frozen_surface_or_failed_send ... ok
+test client::shell::tests::endpoint_requests::worktree_create_leaves_server_focus_unchanged ... ok
+test client::shell::tests::endpoint_requests::worktree_create_cancelled_or_failed_request_never_focuses ... ok
+test client::shell::tests::endpoint_requests::worktree_create_late_success_does_not_focus_after_switching_away_and_back ... ok
+test client::shell::tests::endpoint_requests::worktree_create_success_focuses_returned_tab_on_its_endpoint_after_snapshot_update ... ok
+test client::shell::tests::endpoints::active_workspace_is_the_only_highlight_when_machine_is_expanded ... ok
+test client::shell::tests::endpoints::agent_navigation_keeps_scroll_when_target_is_visible ... ok
+test client::shell::tests::endpoints::agent_navigation_reveal_is_cancelled_by_another_selection ... ok
+test client::shell::tests::endpoints::agent_navigation_reveals_target_using_destination_sort ... ok
+test client::shell::tests::endpoints::aggregate_agent_scroll_still_clamps_when_rows_shrink_on_activation ... ok
+test client::shell::tests::endpoints::aggregate_agents_use_configured_rows_machine_token_and_status_colors ... FAILED
+test client::shell::tests::endpoints::aggregate_priority_uses_client_observed_recency_across_machines ... ok
+test client::shell::tests::endpoints::cached_offline_navigator_and_mobile_targets_are_dimmed_and_disabled ... ok
+test client::shell::tests::endpoints::agent_navigation_reveals_offscreen_targets ... ok
+test client::shell::tests::endpoints::collapsed_aggregate_workspace_status_uses_its_status_color ... ok
+test client::shell::tests::endpoints::clicking_remote_machine_name_requests_activation_without_mutating_projection ... ok
+test client::shell::tests::endpoints::clicking_local_can_cancel_a_remote_switch_while_local_is_still_displayed ... ok
+test client::shell::tests::endpoints::context_menu_lookup_ignores_inactive_endpoint_workspaces ... ok
+test client::shell::tests::endpoints::current_workspace_agent_view_excludes_same_workspace_id_on_other_machine ... ok
+test client::shell::tests::endpoints::current_workspace_or_blocked_keeps_foreign_attention_only ... ok
+test client::shell::tests::endpoints::disconnected_active_endpoint_freezes_surface_and_marks_cached_ui_stale ... FAILED
+test client::shell::tests::endpoints::focus_agent_index_uses_online_aggregate_rows ... ok
+test client::shell::tests::endpoints::future_surface_waits_for_its_exact_snapshot_revision ... ok
+test client::shell::tests::endpoints::expanded_machine_sidebar_applies_space_row_gap_within_each_machine ... ok
+test client::shell::tests::endpoints::graphics_scope_qualifies_colliding_boot_ids_by_endpoint ... ok
+test client::shell::tests::endpoints::inactive_endpoint_snapshot_cache_never_regresses_revision ... ok
+test client::shell::tests::endpoints::legacy_custom_views_keep_v1_per_endpoint_projection ... ok
+test client::shell::tests::endpoints::expanded_machine_sidebar_reveals_newly_focused_workspace ... ok
+test client::shell::tests::endpoints::live_catalog_rename_preserves_snapshot_and_disable_reenable_clears_it ... ok
+test client::shell::tests::endpoints::live_catalog_active_removal_does_not_retain_remote_projection_or_input ... ok
+test client::shell::tests::endpoints::local_direct_graphics_accept_server_ids_across_endpoint_switches_and_restarts ... ok
+test client::shell::tests::endpoints::machine_diagnostic_badge_reopens_notice_without_collapsing_machine ... ok
+test client::shell::tests::endpoints::local_agent_click_can_cancel_a_pending_remote_switch ... ok
+test client::shell::tests::endpoints::machine_navigation_does_not_require_a_local_snapshot_or_surface ... ok
+test client::shell::tests::endpoints::navigator_foreign_pane_selection_activates_its_endpoint ... ok
+test client::shell::tests::endpoints::navigator_foreign_workspace_heading_keeps_the_workspace_target ... ok
+test client::shell::tests::endpoints::navigator_keeps_saved_machine_visible_before_metadata_arrives ... ok
+test client::shell::tests::endpoints::mobile_foreign_agent_and_workspace_targets_activate_their_endpoint ... ok
+test client::shell::tests::endpoints::navigator_machine_selection_opens_its_remembered_view ... ok
+test client::shell::tests::endpoints::navigator_workspace_arrows_cross_machine_headings_without_activating_them ... ok
+test client::shell::tests::endpoints::new_connection_generation_accepts_a_lower_same_boot_projection_revision ... ok
+test client::shell::tests::endpoints::newer_snapshot_does_not_reuse_stale_agent_view_projection ... ok
+test client::shell::tests::endpoints::navigator_uses_machine_parents_only_for_federated_clients ... ok
+test client::shell::tests::endpoints::reconnect_snapshot_waits_for_coherent_activation_before_replacing_projection ... ok
+test client::shell::tests::endpoints::reconnecting_local_selection_still_reaches_the_runtime ... ok
+test client::shell::tests::endpoints::machine_arrow_toggles_inactive_machine_without_switching ... ok
+test client::shell::tests::endpoints::reconnect_same_endpoint_accepts_new_generation_surface_revision ... ok
+test client::shell::tests::endpoints::selected_custom_sort_orders_rendering_and_indexed_navigation ... ok
+test client::shell::tests::endpoints::same_machine_reboot_still_resets_agent_scroll ... ok
+test client::shell::tests::endpoints::selected_default_view_ignores_inactive_endpoint_projection ... FAILED
+test client::shell::tests::endpoints::selected_position_sort_uses_public_tab_and_pane_numbers ... ok
+test client::shell::tests::endpoints::saved_machine_preserves_endpoint_scoped_worktree_collapses ... ok
+test client::shell::tests::endpoints::sidebar_renders_local_and_saved_ssh_endpoints_with_status ... ok
+test client::shell::tests::endpoints::switching_machines_from_copy_mode_restores_terminal_input ... ok
+test client::shell::tests::endpoints::unselected_endpoint_completion_projects_done_client_side ... ok
+test client::shell::tests::endpoints::workspace_drag_rejects_foreign_endpoint_slots ... ok
+test client::shell::tests::endpoints::switching_machines_preserves_aggregate_agent_scroll_and_visible_rows ... ok
+test client::shell::tests::endpoints::workspace_navigation::active_preview_is_not_retargeted_by_deletion_or_reboot ... ok
+test client::shell::tests::endpoints::sidebar_toggle_remains_clickable_with_overflowing_agents ... ok
+test client::shell::tests::endpoints::workspace_navigation::cancelled_close_does_not_restore_an_older_navigation_highlight ... ok
+test client::shell::tests::endpoints::workspace_navigation::coalesced_navigation_focus_does_not_leave_a_permanent_highlight ... ok
+test client::shell::tests::endpoints::workspace_navigation::configured_ctrl_bracket_navigate_binding_wins_over_cancel ... ok
+test client::shell::tests::endpoints::workspace_navigation::accepted_local_navigation_keeps_highlight_until_authoritative_focus ... ok
+test client::shell::tests::endpoints::workspace_navigation::direct_agent_focus_repaints_when_releasing_a_workspace_highlight ... ok
+test client::shell::tests::endpoints::workspace_navigation::empty_workspace_navigation_enter_exits_without_focusing ... ok
+test client::shell::tests::endpoints::workspace_navigation::aggregate_navigation_reveals_overflow_and_preserves_order ... ok
+test client::shell::tests::endpoints::workspace_navigation::foreign_preview_blocks_keyboard_actions_but_keeps_active_action_context ... ok
+test client::shell::tests::endpoints::workspace_navigation::foreign_preview_survives_local_updates_and_rejects_stale_enter ... ok
+test client::shell::tests::endpoints::workspace_navigation::foreign_workspace_preview_blocks_paste_into_hidden_copy_search ... ok
+test client::shell::tests::endpoints::workspace_navigation::kitty_ctrl_bracket_cancels_a_blocked_foreign_preview ... ok
+test client::shell::tests::endpoints::workspace_navigation::kitty_ctrl_bracket_leaves_navigation_like_esc ... ok
+test client::shell::tests::endpoints::workspace_navigation::kitty_ctrl_shift_bracket_keeps_navigation_open ... ok
+test client::shell::tests::endpoints::workspace_navigation::failed_local_navigation_releases_only_its_own_highlight ... ok
+test client::shell::tests::endpoints::workspace_navigation::mouse_clicks_cancel_remote_workspace_navigation ... ok
+test client::shell::tests::endpoints::workspace_navigation::directional_pane_focus_releases_an_accepted_workspace_highlight ... ok
+test client::shell::tests::endpoints::workspace_navigation::navigation_highlight_requires_enqueued_focus_and_yields_to_new_intent ... ok
+test client::shell::tests::endpoints::workspace_navigation::navigation_highlight_ends_for_noop_focus_and_focused_creation ... ok
+test client::shell::tests::endpoints::workspace_navigation::local_navigation_highlight_stays_visible_with_terminal_theme ... ok
+test client::shell::tests::endpoints::workspace_navigation::navigation_uses_displayed_group_order_when_local_is_unavailable ... ok
+test client::shell::tests::endpoints::workspace_navigation::single_machine_compact_navigation_includes_visible_collapsed_group_children ... ok
+test client::shell::tests::endpoints::workspace_navigation::navigation_highlights_only_the_preview_and_activates_on_enter ... ok
+test client::shell::tests::endpoints::workspace_navigation_waits_for_the_target_presentation_fence ... ok
+test client::shell::tests::graphics::endpoint_notice_and_multiline_diagnostic_cover_the_actual_rows ... ok
+test client::shell::tests::endpoints::workspace_navigation::pending_navigation_highlight_does_not_survive_identity_changes ... ok
+test client::shell::tests::graphics::failed_direct_ack_composition_restores_graphics_for_inline_retry ... ok
+test client::shell::tests::endpoints::workspace_navigation::workspace_navigation_respects_each_machines_visible_worktree_groups ... ok
+test client::shell::tests::graphics::mobile_switcher_still_hides_the_entire_underlying_surface ... ok
+test client::shell::tests::graphics::popup_terminal_keeps_own_graphics_and_hides_only_background_overlap ... ok
+test client::shell::tests::graphics::selection_copy_cursor_and_search_hide_only_the_highlighted_images ... ok
+test client::shell::tests::input_conformance::goto_search_opens_on_shifted_slash_from_a_report_all_pane ... ok
+test client::shell::tests::input_conformance::goto_search_opens_only_for_a_typed_slash ... ok
+test client::shell::tests::graphics::notifications_and_clipboard_feedback_only_cover_their_drawn_corners ... ok
+test client::shell::tests::input_conformance::ime_committed_text_reaches_every_pane_mode_exactly_once ... ok
+test client::shell::tests::input_conformance::lab_kitty_function_keys_reach_the_pane ... ok
+test client::shell::tests::graphics::every_dialog_and_menu_occludes_its_panel_not_the_whole_screen ... ok
+test client::shell::tests::input_conformance::layout_chord_releases_pair_when_modifiers_change_first ... ok
+test client::shell::tests::input_conformance::layout_ctrl_chords_match_ghostty_direct ... ok
+test client::shell::tests::input_conformance::overlapping_layout_and_us_keys_release_exactly ... ok
+test client::shell::tests::input_conformance::reporter_split_captures_decode_like_the_unsplit_input ... ok
+test client::shell::tests::input_conformance::reporter_text_key_release_reaches_kitty_event_pane ... ok
+test client::shell::tests::input_conformance::split_read_robustness ... ok
+test client::shell::tests::input_conformance::wezterm_escape_tap_reaches_the_pane_with_doubled_escape_preserved ... ok
+test client::shell::tests::input_domain::client_shell_graphics_follow_final_shell_origin_and_local_overlay_visibility ... ok
+test client::shell::tests::input_domain::committed_text_still_reaches_a_report_all_pane_as_text ... ok
+test client::shell::tests::input_domain::delayed_link_fallback_does_not_replay_against_changed_geometry ... ok
+test client::shell::tests::input_domain::every_configured_prefix_enters_prefix_mode ... ok
+test client::shell::tests::input_domain::full_host_palette_response_is_sent_as_one_theme_update ... ok
+test client::shell::tests::input_domain::held_key_reports_keep_their_release_around_ime_commits_and_focus_loss ... ok
+test client::shell::tests::input_domain::help_overlay_uses_live_keymap_and_owns_filter_state ... ok
+test client::shell::tests::input_domain::highlighted_search_match_copies_after_in_flight_repeat ... ok
+test client::shell::tests::input_domain::host_appearance_prefers_explicit_reports_over_background_inference ... ok
+test client::shell::tests::input_domain::invalid_experimental_reload_keeps_input_source_preference ... ok
+test client::shell::tests::input_domain::modal_paste_inserts_clipboard_text_through_overlay_text_path ... ok
+test client::shell::tests::input_domain::modal_paste_shortcut_modifiers_are_platform_specific ... ok
+test client::shell::tests::input_domain::non_latin_ctrl_chord_release_matches_after_ctrl_is_let_go ... ok
+test client::shell::tests::input_domain::pane_key_release_keeps_the_press_target ... ok
+test client::shell::tests::input_domain::physical_release_uses_the_leased_press_code_with_current_modifiers ... ok
+test client::shell::tests::input_domain::pixel_host_reports_use_cells_without_target_pixel_mode_and_release_outside ... ok
+test client::shell::tests::input_domain::plain_text_after_the_prefix_runs_the_prefix_binding_on_a_report_all_host ... ok
+test client::shell::tests::input_domain::plain_text_in_navigate_mode_runs_the_navigate_binding_on_a_report_all_host ... ok
+test client::shell::tests::input_domain::raw_backspace_follows_the_host_tty_erase_character ... ok
+test client::shell::tests::input_domain::rename_pane_empty_value_is_preserved_as_a_clear_request ... ok
+test client::shell::tests::input_domain::shell_targets_unconsumed_input_and_keeps_prefix_local ... ok
+test client::shell::tests::input_domain::shifted_punctuation_release_after_shift_reaches_the_pane ... ok
+test client::shell::tests::input_conformance::mouse_transparency_conformance ... ok
+test client::shell::tests::input_domain::text_press_release_survives_shift_released_first_and_never_becomes_a_repeat ... ok
+test client::shell::tests::input_domain::unmatched_release_never_takes_a_held_key_while_herdr_owns_another_press ... ok
+test client::shell::tests::keybindings_settings::configured_prefix_is_client_owned_and_renders_its_bar ... ok
+test client::shell::tests::keybindings_settings::custom_binding_invokes_only_the_endpoint_manifest_id ... ok
+test client::shell::tests::keybindings_settings::custom_binding_missing_from_endpoint_manifest_is_not_forwarded ... ok
+test client::shell::tests::keybindings_settings::endpoint_notice_dedupe_resets_for_a_new_server_boot ... ok
+test client::shell::tests::keybindings_settings::endpoint_timeout_is_a_deduplicated_server_notice ... ok
+test client::shell::tests::keybindings_settings::generic_endpoint_failures_and_control_errors_are_visible ... ok
+test client::shell::tests::keybindings_settings::help_overlay_restores_released_search_scroll_and_custom_binding_behavior ... ok
+test client::shell::tests::keybindings_settings::inactive_auto_named_tab_label_does_not_stack_terminal_faint ... FAILED
+test client::shell::tests::keybindings_settings::manual_client_chrome_preferences_round_trip_per_endpoint ... ok
+test client::shell::tests::keybindings_settings::plugin_command_carries_client_owned_selection_coordinates ... ok
+test client::shell::tests::keybindings_settings::plus_commands_survive_snapshots_and_reload_for_both_keybinding_sources ... ok
+test client::shell::tests::keybindings_settings::prefix_endpoint_action_uses_public_api_with_stable_ids ... ok
+test client::shell::tests::keybindings_settings::remote_client_preferences_keep_the_same_identity_across_bridge_processes ... ok
+test client::shell::tests::keybindings_settings::remote_client_preferences_process_child ... ok
+test client::shell::tests::input_domain::styled_client_composition_preserves_pane_hyperlinks ... ok
+test client::shell::tests::keybindings_settings::resize_mode_reuses_endpoint_resize_and_stays_active_until_done ... ok
+test client::shell::tests::keybindings_settings::shell_new_controls_use_the_same_client_action_routes_as_keybinds ... ok
+test client::shell::tests::keybindings_settings::remote_keybinding_sources_keep_local_commands_off_endpoints_and_apply_server_profiles ... ok
+test client::shell::tests::keybindings_settings::unavailable_endpoint_method_is_disabled_without_disconnect ... ok
+test client::shell::tests::keybindings_settings::tab_bar_renders_endpoint_status_ellipses_and_clamps_to_useful_scroll ... ok
+test client::shell::tests::link_hover::ctrl_hover_clears_on_release_content_change_and_focus_loss ... ok
+test client::shell::tests::link_hover::ctrl_hover_coalesces_motion_and_ignores_old_replies ... ok
+test client::shell::tests::link_hover::ctrl_hover_content_patch_removes_all_old_underlines ... ok
+test client::shell::tests::link_hover::ctrl_hover_explicit_wide_label_includes_the_spacer_cell ... ok
+test client::shell::tests::link_hover::ctrl_hover_groups_contiguous_same_destination_cells_without_server_query ... ok
+test client::shell::tests::link_hover::ctrl_hover_ignores_late_reply_after_pointer_leaves ... ok
+test client::shell::tests::link_hover::ctrl_hover_is_silent_when_unsupported_or_rejected ... ok
+test client::shell::tests::korean::korean_ui_keeps_menus_settings_and_help_usable_at_multiple_sizes ... ok
+test client::shell::tests::link_hover::ctrl_hover_pending_request_does_not_block_another_endpoint_with_the_same_boot_id ... ok
+test client::shell::tests::link_hover::ctrl_hover_render_scale_profile ... ignored, non-gating fixed-geometry hover composition profile
+test client::shell::tests::link_hover::ctrl_hover_underlines_wrapped_segments_and_caches_the_link ... ok
+test client::shell::tests::link_hover::ctrl_hover_preserves_fast_patches_for_other_panes ... ok
+test client::shell::tests::mobile::mobile_background_workspace_uses_its_own_active_tab_status ... ok
+test client::shell::tests::mobile::mobile_layout_reserves_only_client_header ... ok
+test client::shell::tests::mobile::mobile_header_and_switcher_render_released_sections_and_stable_targets ... ok
+test client::shell::tests::mobile::mobile_menu_keeps_inert_notes_open_and_cancel_without_workspace_in_navigate ... ok
+test client::shell::tests::mobile::mobile_previous_workspace_action_wraps_across_expanded_entries ... ok
+test client::shell::tests::mobile::mobile_shell_controls_remain_clickable_when_pane_mouse_capture_is_disabled ... ok
+test client::shell::tests::mobile::mobile_switcher_create_and_menu_rows_reuse_client_actions ... ok
+test client::shell::tests::mobile::mobile_switcher_can_activate_an_online_saved_machine ... ok
+test client::shell::tests::mobile::navigate_update_status_uses_released_desktop_and_mobile_placement ... FAILED
+test client::shell::tests::mobile::mobile_switcher_scroll_close_and_width_transition_clear_mobile_hits ... ok
+test client::shell::tests::mouse_selection::client_double_click_selects_word_and_copies_only_after_release ... ok
+test client::shell::tests::mouse_selection::context_menu_keyboard_and_outside_click_are_client_owned ... ok
+test client::shell::tests::mouse_selection::ctrl_click_routes_link_activation_through_endpoint_then_client_host ... ok
+test client::shell::tests::mouse_selection::ctrl_click_without_a_link_replays_the_original_gesture ... ok
+test client::shell::tests::mouse_selection::disabled_mouse_chrome_keeps_tab_wheel_but_removes_split_drag_hits ... ok
+test client::shell::tests::mouse_selection::double_click_drag_autoscroll_keeps_absolute_word_anchor ... ok
+test client::shell::tests::mouse_selection::double_click_drag_ignores_row_reply_after_typing_or_new_click ... ok
+test client::shell::tests::mouse_selection::double_click_drag_invalidates_cached_boundaries_outside_selected_cells ... ok
+test client::shell::tests::mouse_selection::double_click_drag_resize_cancels_pending_word_lookup ... ok
+test client::shell::tests::mouse_selection::double_click_drag_survives_focus_lag_after_anchor_reply ... ok
+test client::shell::tests::mouse_selection::double_click_drag_selects_whole_words_in_both_directions ... ok
+test client::shell::tests::input_conformance::keyboard_transparency_conformance ... ok
+test client::shell::tests::mouse_selection::double_click_drag_waits_for_latest_row_before_copying ... ok
+test client::shell::tests::mouse_selection::pane_content_updates_preserve_live_ranges_until_geometry_or_screen_changes ... ok
+test client::shell::tests::mouse_selection::double_click_release_ignores_reply_after_focus_or_content_changes ... ok
+test client::shell::tests::mouse_selection::pane_pixel_mouse_preserves_pane_relative_pixel_coordinates ... ok
+test client::shell::tests::mouse_selection::pane_mouse_input_keeps_stable_target_and_endpoint_encoding ... ok
+test client::shell::tests::mouse_selection::pane_owned_right_click_forwards_the_complete_gesture ... ok
+test client::shell::tests::mouse_selection::pane_split_drag_uses_projected_handle_and_stable_tab_path ... ok
+test client::shell::tests::mouse_selection::selection_repaint_cadence_allows_immediate_paint_when_due ... ok
+test client::shell::tests::mouse_selection::selection_release_copies_latest_position_before_deferred_paint ... ok
+test client::shell::tests::mouse_selection::selection_repaint_cadence_does_not_leave_work_after_another_composition ... ok
+test client::shell::tests::mouse_selection::reconnect_word_selection_tracks_content_changes ... ok
+test client::shell::tests::mouse_selection::selection_repaint_cadence_keeps_one_deadline_and_flushes_when_input_stops ... ok
+test client::shell::tests::mouse_selection::tab_drag_clears_its_drop_target_after_leaving_the_tab_row ... ok
+test client::shell::tests::mouse_selection::tab_wheel_switches_tabs_without_changing_overflow_scroll ... ok
+test client::shell::tests::popup_focus_projection::clear_pane_binding_targets_the_focused_endpoint_pane ... ok
+test client::shell::tests::mouse_selection::tab_click_waits_for_release_and_drag_reorders_by_stable_id ... ok
+test client::shell::tests::popup_focus_projection::clipboard_image_targets_the_focused_pane_or_active_popup ... ok
+test client::shell::tests::popup_focus_projection::desktop_composition_keeps_shell_outside_origin_relative_surface ... ok
+test client::shell::tests::popup_focus_projection::client_composes_popup_terminal_content_inside_client_owned_chrome ... ok
+test client::shell::tests::popup_focus_projection::focus_gain_reports_focus_and_honors_redraw_policy ... ok
+test client::shell::tests::popup_focus_projection::edit_scrollback_binding_targets_the_focused_endpoint_pane ... ok
+test client::shell::tests::popup_focus_projection::modal_paste_target_requires_a_focused_editable_client_field ... ok
+test client::shell::tests::popup_focus_projection::focus_loss_releases_held_pane_keys_before_reporting_focus ... ok
+test client::shell::tests::popup_focus_projection::focus_loss_releases_active_pane_mouse_before_reporting_focus ... ok
+test client::shell::tests::popup_focus_projection::non_overlay_ctrl_v_is_forwarded_to_the_focused_pane ... ok
+test client::shell::tests::popup_focus_projection::pane_mouse_release_survives_popup_open_transition ... ok
+test client::shell::tests::popup_focus_projection::pending_popup_suppresses_held_pane_repeats_but_preserves_release ... ok
+test client::shell::tests::popup_focus_projection::pane_scrollbar_track_and_thumb_use_stable_endpoint_scroll_requests ... ok
+test client::shell::tests::popup_focus_projection::pending_scroll_target_does_not_relabel_an_older_surface ... ok
+test client::shell::tests::popup_focus_projection::popup_close_reprocesses_held_key_repeats_into_the_focused_pane ... ok
+test client::shell::tests::popup_focus_projection::popup_command_blocks_underlying_input_until_surface_or_error ... ok
+test client::shell::tests::popup_focus_projection::popup_preemption_cancels_settings_theme_preview ... ok
+test client::shell::tests::popup_focus_projection::popup_target_survives_surface_invalidation_during_resize ... ok
+test client::shell::tests::popup_focus_projection::popup_owns_keys_text_paste_and_mouse_before_shell_controls ... ok
+test client::shell::tests::popup_focus_projection::popup_transition_dismisses_client_overlays_and_restores_pane_input_after_close ... ok
+test client::shell::tests::popup_focus_projection::prefix_input_source_changes_are_client_owned_and_focus_safe ... ok
+test client::shell::tests::popup_focus_projection::retained_surface_patch_rejects_stale_base_without_mutating_surface ... ok
+test client::shell::tests::popup_focus_projection::resize_invalidation_drops_stale_hits_but_preserves_gesture_release ... ok
+test client::shell::tests::popup_focus_projection::retained_surface_patch_updates_only_pane_cells_without_recomposing_chrome ... ok
+test client::shell::tests::popup_focus_projection::retained_surface_patch_updates_scrollbar_cells_and_pane_hit_metadata ... ok
+test client::shell::tests::popup_focus_projection::retained_surface_patch_recomposes_client_owned_mode_and_diagnostic_rows ... ok
+test client::shell::tests::popup_focus_projection::shell_ignores_older_same_boot_snapshot_and_surface ... ok
+test client::shell::tests::popup_focus_projection::sidebar_scrollbars_use_proportional_shared_geometry_and_drag ... ok
+test client::shell::tests::popup_focus_projection::shell_refuses_mismatched_projection_and_clears_stale_hits_in_either_order ... ok
+test client::shell::tests::startup_overlays::coalesced_release_notes_open_and_scroll_uses_current_geometry ... ok
+test client::shell::tests::startup_overlays::coalesced_release_notes_open_and_mouse_uses_current_geometry ... ok
+test client::shell::tests::startup_overlays::combined_update_and_integration_attention_preserves_both_badges ... FAILED
+test client::shell::tests::startup_overlays::config_diagnostic_offsets_only_the_pane_rows_it_overlaps ... ok
+test client::shell::tests::startup_overlays::client_settings_preview_restore_and_endpoint_integrations_are_owned_by_overlay ... ok
+test client::shell::tests::startup_overlays::endpoint_keybindings_hide_only_local_keybinding_diagnostics ... ok
+test client::shell::tests::startup_overlays::current_release_notes_use_whats_new_without_attention_badge ... ok
+test client::shell::tests::startup_overlays::endpoint_reload_result_does_not_override_snapshot_diagnostic_authority ... ok
+test client::shell::tests::startup_overlays::failed_product_announcement_dismiss_reopens_authoritative_snapshot ... ok
+test client::shell::tests::startup_overlays::live_client_config_keeps_sound_diagnostics ... ok
+test client::shell::tests::startup_overlays::onboarding_has_priority_over_endpoint_product_announcement ... ok
+test client::shell::tests::startup_overlays::onboarding_completion_persists_and_opens_endpoint_integrations ... ok
+test client::shell::tests::startup_overlays::endpoint_product_announcement_is_client_rendered_modal_and_dismissed_by_identity ... FAILED
+test client::shell::tests::startup_overlays::release_notes_reconcile_and_failed_dismiss_reopens_authoritative_snapshot ... ok
+test client::shell::tests::startup_overlays::startup_config_diagnostics_are_client_rendered_and_persist_until_replaced ... ok
+test client::shell::tests::startup_overlays::outdated_integration_badges_launcher_settings_and_settings_tab ... ok
+test client::shell::tests::startup_overlays::product_announcement_mouse_is_modal_and_closes_only_from_its_button ... ok
+test client::shell::tests::startup_overlays::unavailable_integration_list_does_not_wedge_settings ... ok
+test client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal ... FAILED
+test client::shell::tests::startup_overlays::startup_onboarding_shows_configured_prefix ... FAILED
+test client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version ... FAILED
+test client::shell::tests::text_editing::busy_worktree_inputs_ignore_edits_paste_and_cancel ... ok
+test client::shell::tests::text_editing::copy_search_owns_prefix_but_parked_prompt_does_not_steal_input ... ok
+test client::shell::tests::text_editing::all_naming_targets_preserve_submission_and_empty_semantics ... ok
+test client::shell::tests::text_editing::cursor_movement_preserves_filter_selection_scroll_and_branch_error ... ok
+test client::shell::tests::text_editing::all_ten_fields_route_shared_text_editing ... ok
+test client::shell::tests::text_editing::enter_and_escape_preserve_overlay_actions_with_generated_text ... ok
+test client::shell::tests::text_editing::focused_filters_keep_ctrl_n_p_navigation_and_literal_commands ... ok
+test client::shell::tests::text_editing::plain_and_ime_text_fill_every_field_on_a_report_all_host ... ok
+test client::shell::tests::text_editing::text_delivery_paths_insert_at_the_cursor ... ok
+test client::shell::text_editor::tests::accepting_trimmed_branch_preserves_cursor_and_local_kill_buffer ... ok
+test client::shell::text_editor::tests::enter_and_escape_ignore_generated_text ... ok
+test client::shell::text_editor::tests::every_binding_edits_at_the_cursor ... ok
+test client::shell::text_editor::tests::insertion_normalizes_controls_and_respects_host_text ... ok
+test client::shell::text_editor::tests::suggestions_movement_kills_and_yank ... ok
+test client::shell::text_editor::tests::unicode_graphemes_and_boundary_changing_edits ... ok
+test client::shell::text_editor::tests::viewport_and_render_are_pure_and_grapheme_safe ... ok
+test client::shell::text_editor::tests::words_distinguish_paths_punctuation_and_whitespace ... ok
+test client::shell::worktrees::path_tests::endpoint_path_style_is_independent_of_the_client_os ... ok
+test client::shell_runtime::tests::host_color_reaches_server_before_first_snapshot ... ok
+test client::shell::tests::text_editing::rename_clear_exceptions_remain_local_and_copy_prompt_yields_to_popup ... ok
+test client::shell::tests::text_editing::every_field_renders_long_unicode_across_resize_without_mutation ... ok
+
+failures:
+
+---- client::shell::tests::copy::client_mouse_selection_highlights_and_copies_through_endpoint_extraction stdout ----
+
+thread 'client::shell::tests::copy::client_mouse_selection_highlights_and_copies_through_endpoint_extraction' (618431) panicked at src/client/shell/tests/copy.rs:214:5:
+assertion `left == right` failed
+  left: Some("클립보드에 복사됨")
+ right: Some("copied to clipboard")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- client::shell::tests::copy::clipboard_feedback_is_client_local_and_respects_config stdout ----
+
+thread 'client::shell::tests::copy::clipboard_feedback_is_client_local_and_respects_config' (618433) panicked at src/client/shell/tests/copy.rs:228:5:
+assertion `left == right` failed
+  left: Some("클립보드에 복사됨")
+ right: Some("copied to clipboard")
+
+---- client::shell::tests::endpoints::aggregate_agents_use_configured_rows_machine_token_and_status_colors stdout ----
+
+thread 'client::shell::tests::endpoints::aggregate_agents_use_configured_rows_machine_token_and_status_colors' (618482) panicked at src/client/shell/tests/endpoints.rs:1300:5:
+frame:  컴퓨터                  │   1      +                                                               
+                         │LIVE                                                                      
+ ▾ Local                 │PANE                                                                      
+   ○ client-shell        │                                                                          
+     main                │                                                                          
+ ▾ Build                ●│                                                                          
+   × client-shell        │                                                                          
+     main                │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+ 새로 · Local        메뉴│                                                                          
+─────────────────────────│                                                                          
+ 에전          작공순    │                                                                          
+                         │                                                                          
+ ○ Local · local agent   │                                                                          
+ × Build · remote agent  │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                        «│                                                                          
+
+---- client::shell::tests::endpoints::disconnected_active_endpoint_freezes_surface_and_marks_cached_ui_stale stdout ----
+
+thread 'client::shell::tests::endpoints::disconnected_active_endpoint_freezes_surface_and_marks_cached_ui_stale' (618491) panicked at src/client/shell/tests/endpoints.rs:2241:5:
+frame:  컴퓨터                  │   1      +                                        ◐ Build · 다시 연결 중 
+                         │LIVE                                                                      
+ ▾ Local                 │PANE                                                                      
+   ○ client-shell        │                                                                          
+     main                │                                                                          
+ ▾ Build   ◐ 다시 연결 중│                                                                          
+   × remote-workspace    │                                                                          
+     main                │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+ 새로 · Build        메뉴│                                                                          
+─────────────────────────│                                                                          
+ 에전          작공순    │                                                                          
+                         │                                                                          
+ × Build · remote agent  │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                        «│                                                                          
+
+---- client::shell::tests::endpoints::selected_default_view_ignores_inactive_endpoint_projection stdout ----
+
+thread 'client::shell::tests::endpoints::selected_default_view_ignores_inactive_endpoint_projection' (618521) panicked at src/client/shell/tests/endpoints.rs:1511:5:
+frame:  컴퓨터                  │   1      +                                                               
+                         │LIVE                                                                      
+ ▾ Local                 │PANE                                                                      
+   ○ client-shell        │                                                                          
+     main                │                                                                          
+ ▾ Build                ●│                                                                          
+   ○ client-shell        │                                                                          
+     main                │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+ 새로 · Local        메뉴│                                                                          
+─────────────────────────│                                                                          
+ 에전          작공순    │                                                                          
+                         │                                                                          
+ Local · local agent     │                                                                          
+ Build · remote agent    │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                         │                                                                          
+                        «│                                                                          
+
+---- client::shell::tests::keybindings_settings::inactive_auto_named_tab_label_does_not_stack_terminal_faint stdout ----
+
+thread 'client::shell::tests::keybindings_settings::inactive_auto_named_tab_label_does_not_stack_terminal_faint' (618700) panicked at src/client/shell/tests/mod.rs:183:5:
+symbol "beta" not found in Rect { x: 35, y: 0, width: 8, height: 1 }: ["ta    + "]
+
+---- client::shell::tests::mobile::navigate_update_status_uses_released_desktop_and_mobile_placement stdout ----
+
+thread 'client::shell::tests::mobile::navigate_update_status_uses_released_desktop_and_mobile_placement' (618732) panicked at src/client/shell/tests/mobile.rs:24:5:
+assertion failed: row_text(&bottom, 29).contains("업데이트 준비됨")
+
+---- client::shell::tests::startup_overlays::combined_update_and_integration_attention_preserves_both_badges stdout ----
+
+thread 'client::shell::tests::startup_overlays::combined_update_and_integration_attention_preserves_both_badges' (618791) panicked at src/client/shell/tests/startup_overlays.rs:1116:46:
+update badge
+
+---- client::shell::tests::startup_overlays::endpoint_product_announcement_is_client_rendered_modal_and_dismissed_by_identity stdout ----
+
+thread 'client::shell::tests::startup_overlays::endpoint_product_announcement_is_client_rendered_modal_and_dismissed_by_identity' (618797) panicked at src/client/shell/tests/startup_overlays.rs:33:5:
+assertion failed: text.contains("product announcement · v0.8.2")
+
+---- client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal stdout ----
+
+thread 'client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal' (618808) panicked at src/client/shell/tests/startup_overlays.rs:316:5:
+assertion failed: text.contains("this is a mouse-first terminal")
+
+---- client::shell::tests::startup_overlays::startup_onboarding_shows_configured_prefix stdout ----
+
+thread 'client::shell::tests::startup_overlays::startup_onboarding_shows_configured_prefix' (618809) panicked at src/client/shell/tests/startup_overlays.rs:367:5:
+assertion failed: text.contains("ctrl+shift+b enters prefix mode")
+
+---- client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version stdout ----
+
+thread 'client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version' (618811) panicked at src/client/shell/tests/startup_overlays.rs:707:5:
+assertion failed: navigate_text.contains("업데이트 준비됨")
+
+
+failures:
+    client::shell::tests::copy::client_mouse_selection_highlights_and_copies_through_endpoint_extraction
+    client::shell::tests::copy::clipboard_feedback_is_client_local_and_respects_config
+    client::shell::tests::endpoints::aggregate_agents_use_configured_rows_machine_token_and_status_colors
+    client::shell::tests::endpoints::disconnected_active_endpoint_freezes_surface_and_marks_cached_ui_stale
+    client::shell::tests::endpoints::selected_default_view_ignores_inactive_endpoint_projection
+    client::shell::tests::keybindings_settings::inactive_auto_named_tab_label_does_not_stack_terminal_faint
+    client::shell::tests::mobile::navigate_update_status_uses_released_desktop_and_mobile_placement
+    client::shell::tests::startup_overlays::combined_update_and_integration_attention_preserves_both_badges
+    client::shell::tests::startup_overlays::endpoint_product_announcement_is_client_rendered_modal_and_dismissed_by_identity
+    client::shell::tests::startup_overlays::startup_onboarding_is_client_rendered_and_modal
+    client::shell::tests::startup_overlays::startup_onboarding_shows_configured_prefix
+    client::shell::tests::startup_overlays::update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version
+
+test result: FAILED. 369 passed; 12 failed; 2 ignored; 0 measured; 3288 filtered out; finished in 3.55s
+
+error: test failed, to rerun pass `-p herdr --bin herdr`

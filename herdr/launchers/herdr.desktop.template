@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Herdr
+Comment=Terminal workspace manager for AI agents
+Exec=/home/USER/.local/bin/herdr
+TryExec=/home/USER/.local/bin/herdr
+Icon=utilities-terminal
+Terminal=true
+Categories=System;TerminalEmulator;

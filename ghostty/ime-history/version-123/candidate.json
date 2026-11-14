@@ -1,0 +1,6 @@
+{
+  "source": "https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.2.3-0-ppa1/ghostty_1.2.3-0.ppa1_amd64_24.04.deb",
+  "sha256": "99eadff67bf1d5883655dd77eead3256ace3b29a8b77973a2e217a8ebb412609",
+  "binary": "/tmp/ghostty-123-compare-oeg_h1_z/unpacked/usr/bin/ghostty",
+  "installed_system_changed": false
+}

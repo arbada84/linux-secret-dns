@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-15",
+  "scope": [
+    "portable launchers and desktop templates",
+    "Ghostty 1.2.3 installation provenance",
+    "historical Korean input attempts and results",
+    "redacted phone SSH configuration and prior effective settings",
+    "Codex/Claude shared workspace guide",
+    "additional historical build and diagnostic records"
+  ],
+  "validation": {
+    "shell_and_python_syntax": true,
+    "json_parse": true,
+    "relative_document_links": true,
+    "desktop_templates": true,
+    "portable_launcher_environment_isolation": true,
+    "secret_pattern_scan": true,
+    "actual_GUI_or_IME_retest": false,
+    "new_agent_or_model_calls": false,
+    "SSH_configuration_applied": false
+  },
+  "privacy": {
+    "account_auth_and_SSH_keys_included": false,
+    "live_sessions_or_dialogues_included": false,
+    "actual_phone_address_included": false,
+    "binaries_or_build_caches_included": false
+  },
+  "notes": [
+    "Historical records do not prove current device behavior.",
+    "Archived diagnostic scripts retain original temporary paths; review before reuse.",
+    "Herdr Korean source patch is unchanged."
+  ]
+}
