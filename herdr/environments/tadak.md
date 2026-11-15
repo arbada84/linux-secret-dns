@@ -35,7 +35,7 @@ MSI의 Herdr 서버를 업그레이드하거나 교체하지 않았습니다. �
 
 ## 두 에이전트와 이력 연결
 
-MSI의 기존 Codex·Claude 설치와 로그인 상태를 확인했습니다. 계정 인증 파일이나 SSH 개인키를 노트북에서 추가 복사하지 않았습니다.
+MSI의 기존 Codex·Claude 설치를 확인했습니다. 최초 상태 조회에서는 Claude 로그인이 표시됐지만, 후속 재조회에서는 `loggedIn: false`로 확인돼 현재 사용자 로그인이 필요합니다. Codex·Claude가 실제 대화에 응답한 상태는 아직 확인하지 않았습니다. 계정 인증 파일이나 SSH 개인키를 노트북에서 추가 복사하지 않았습니다.
 
 타닥 관련 Codex 세션 121개를 `~/.codex/sessions/`에 복사했고, 현재 대화는 전송 이후 내용까지 스냅샷을 갱신했습니다. Claude의 타닥 프로젝트 대화 파일은 `~/.claude/projects/<MSI-작업폴더-키>/`에 복사했습니다. 대표 Codex·Claude 이력 파일의 양쪽 SHA-256이 일치하는 것을 확인했습니다. 원래 이력 내부의 과거 경로는 기록의 일부로 남겼습니다.
 
@@ -73,7 +73,7 @@ Node 실행 파일, `rea.mjs`, `JAVA_HOME`, `REA_JADX_MCP_JAR` 네 경로가 존
 | 두 에이전트 프로세스와 Herdr 배치 | 생성 확인 |
 | Codex·Claude 이력 파일 전송 | 대표 파일 해시 일치 |
 | Codex 시작 화면 | 새 작업 폴더 신뢰 확인 대기 |
-| Claude 시작 화면 | 최초 실행 테마 선택 대기 |
+| Claude 시작 화면 | 최초 실행 테마 선택 대기. 후속 인증 조회는 로그인 미완료 |
 | 이전 대화를 실제 로딩한 뒤 응답 | 아직 미확인 |
 | REA MCP·Android 빌드·에뮬레이터 실행 | 이번 구성에서 미검증 |
 
@@ -85,7 +85,7 @@ Herdr 0.8.8의 `idle`·`interactive_ready` 표시는 최초 실행 화면에서�
 
 재개할 에이전트는 프로젝트의 `AGENTS.md`, `CLAUDE.md`가 있으면 읽고 `SESSION-SUMMARY.md`, `docs/product/RECOVERY-20261114-DEV107.md`, `.planning/quick/20261111-antigravity-completion/dev97-sticker-chain/CURRENT-WORK.json`을 대조합니다. 오래된 `next` 문장을 그대로 실행하지 말고 최신 종결 상태와 검증 증거를 확인합니다.
 
-현재 남은 환경 확인은 최초 실행 선택, 두 대화의 실제 분기 로딩, 현재 경로 인식, pstack 인식, REA 연결과 개발 도구 경로 점검입니다. Gemini·Antigravity 신규 호출·재시도, 새 유료 API·예산 변경, 운영 서비스·큐·DB 실행은 하지 않습니다. 이 기록을 앱 완성이나 MSI 주 작업본 전환 완료로 해석하지 않습니다.
+현재 남은 환경 확인은 최초 실행 선택과 Claude 사용자 로그인, 두 대화의 실제 분기 로딩, 현재 경로 인식, pstack 인식, REA 연결과 개발 도구 경로 점검입니다. Gemini·Antigravity 신규 호출·재시도, 새 유료 API·예산 변경, 운영 서비스·큐·DB 실행은 하지 않습니다. 이 기록을 앱 완성이나 MSI 주 작업본 전환 완료로 해석하지 않습니다.
 
 ## 관련 자료
 

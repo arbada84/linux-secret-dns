@@ -9,6 +9,7 @@
 | Celluloid 플레이리스트 | `celluloid/` | 폴더 추가 시 자막 파일 자동 제거 |
 | SSH·원격 데스크톱 | 이 문서 하단 | OpenSSH, XRDP, Remmina 및 화면 없는 운영 설정 |
 | Herdr 한국어 UI | [`herdr/`](herdr/README.md) | 0.9.5 비공식 한글화 패치, 설정, 빌드·복원 절차 |
+| 프로젝트별 Herdr 환경 | [`환경 목록`](herdr/environments/README.md) | MSI 타닥·숏줍개발·숏줍대본의 두 에이전트와 이력·검증 상태 |
 | Ghostty 한국어 설정 | [`ghostty/`](ghostty/config.ghostty.example) | GTK 메뉴 언어 설정 예시 |
 | Herdr 한글 입력·협업 | [`후속 구성`](ghostty/1.2.3/README.md), [`협업 절차`](herdr/AGENT-WORKFLOW.md) | 별도 Ghostty 1.2.3 실행기, 입력 시험, 휴대폰 접속 |
 | Mint 데스크톱 설정 기록 | [`docs/`](docs/linux-mint-desktop-settings.md) | 터미널·입력기 확인값과 장치별 적용 범위 |

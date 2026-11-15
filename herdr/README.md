@@ -70,4 +70,4 @@ Ghostty의 한국어 메뉴는 Ghostty가 제공한 번역 파일과 `language =
 
 ## 프로젝트별 환경
 
-[MSI 타닥 환경](environments/tadak.md)에 독립 작업본, Codex·Claude 두 창, 이력 연결, pstack·REA 경로와 최초 설정 대기 상태를 기록했습니다.
+[프로젝트별 환경 목록](environments/README.md)에서 [타닥](environments/tadak.md), [숏줍개발](environments/shortjup-development.md), [숏줍대본](environments/shortjup-scripts.md)의 독립 작업본·두 에이전트·이력 연결·검사 결과와 최초 설정 대기 상태를 확인할 수 있습니다.
