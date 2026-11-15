@@ -1,5 +1,25 @@
 # MSI의 타닥 Herdr 환경
 
+## 사용자 지시: 완전 자동 승인 모드
+
+2026-11-15 사용자는 MSI의 타닥·숏줍개발·숏줍대본 세 작업공간을 완전 자동 승인 모드로 열었다고 확인했다. 이후에도 각 공간의 Codex와 Claude Code는 완전 자동 승인 모드로 시작하고 재시작한다. 이는 사용자가 명시한 실행 모드다.
+
+- Codex는 `--dangerously-bypass-approvals-and-sandbox`를 사용한다. 명령 승인 확인과 실행 샌드박스를 해제하는 옵션이다.
+- Claude Code는 `--dangerously-skip-permissions`를 사용한다. 도구 실행 권한 확인을 생략하는 옵션이다.
+- 기존 프로젝트 경로, 프로젝트 전용 `CODEX_HOME`을 사용하는 구성, 현재 MSI 대화 이력과 pstack 연결을 유지한다. 재시작하면서 읽기 전용 또는 요청 시 승인 모드로 되돌리지 않는다.
+
+아래 예시의 `CODEX_SESSION_ID`와 `CLAUDE_SESSION_ID`에는 이 프로젝트에서 이어갈 현재 MSI 대화 식별자를 설정한다. 실제 식별자는 공개 문서에 기록하지 않는다. 프로젝트 전용 `CODEX_HOME`이 있는 경우 기존 시작 환경을 유지한 채 실행한다.
+
+```bash
+cd "$HOME/Projects/tadak-keyboard"
+codex resume "$CODEX_SESSION_ID" --dangerously-bypass-approvals-and-sandbox
+claude --resume "$CLAUDE_SESSION_ID" --dangerously-skip-permissions
+```
+
+승인 생략은 파일 수정과 셸 명령도 확인 없이 실행할 수 있게 한다. 이 설정은 기존 프로젝트의 작업 범위와 운영 실행 제한을 바꾸지 않는다. Gemini·Antigravity 중지 지시와 별도 제작·배포 승인 범위는 계속 적용한다. 로그인과 최초 신뢰 화면은 사용자가 처리하며 이 문서 갱신으로 자동 선택하지 않는다.
+
+이 절은 최초 구축 때의 읽기 전용·요청 시 승인 실행 예시를 대체하는 최신 사용자 지시다. 아래 초기 화면과 확인 대기 기록은 당시 관찰 결과로 보존한다. 현재 자동 모드 실행 여부는 사용자 확인에 근거하며, 이번 문서 수정에서 각 프로세스를 재시작하거나 실행 인수를 다시 검증하지 않았다.
+
 2026-11-15에 노트북의 타닥 개발 자료를 MSI로 복사하고 Codex·Claude 두 창을 구성한 기록입니다. 자료 복사 완료와 에이전트의 실제 대화 재개 완료를 구분합니다. 이 문서는 공개용 설정 기록이며 실제 대화 파일, 대화 UUID, 인증 정보와 서버 접속 주소를 포함하지 않습니다.
 
 ## 현재 구성
@@ -64,7 +84,7 @@ Node 실행 파일, `rea.mjs`, `JAVA_HOME`, `REA_JADX_MCP_JAR` 네 경로가 존
 
 외부 SDK·모델·가상환경의 절대 링크와 실행 스크립트는 여전히 노트북 경로를 포함할 수 있습니다. 이전 PID, ADB 포트, snapshot, 실행 소유권 epoch를 MSI에서 재사용하지 않습니다. 개발 서명을 새 키로 교체하지 않습니다.
 
-## 실제 확인 상태
+## 초기 구축 시점 확인 상태
 
 | 항목 | 2026-11-15 확인 결과 |
 |------|-------------------|
@@ -85,7 +105,7 @@ Herdr 0.8.8의 `idle`·`interactive_ready` 표시는 최초 실행 화면에서�
 
 재개할 에이전트는 프로젝트의 `AGENTS.md`, `CLAUDE.md`가 있으면 읽고 `SESSION-SUMMARY.md`, `docs/product/RECOVERY-20261114-DEV107.md`, `.planning/quick/20261111-antigravity-completion/dev97-sticker-chain/CURRENT-WORK.json`을 대조합니다. 오래된 `next` 문장을 그대로 실행하지 말고 최신 종결 상태와 검증 증거를 확인합니다.
 
-현재 남은 환경 확인은 최초 실행 선택과 Claude 사용자 로그인, 두 대화의 실제 분기 로딩, 현재 경로 인식, pstack 인식, REA 연결과 개발 도구 경로 점검입니다. Gemini·Antigravity 신규 호출·재시도, 새 유료 API·예산 변경, 운영 서비스·큐·DB 실행은 하지 않습니다. 이 기록을 앱 완성이나 MSI 주 작업본 전환 완료로 해석하지 않습니다.
+초기 구축 당시 남겨 둔 환경 확인은 최초 실행 선택과 Claude 사용자 로그인, 두 대화의 실제 분기 로딩, 현재 경로 인식, pstack 인식, REA 연결과 개발 도구 경로 점검입니다. Gemini·Antigravity 신규 호출·재시도, 새 유료 API·예산 변경, 운영 서비스·큐·DB 실행은 하지 않습니다. 이 기록을 앱 완성이나 MSI 주 작업본 전환 완료로 해석하지 않습니다.
 
 ## 관련 자료
 
