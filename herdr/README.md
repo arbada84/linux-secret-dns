@@ -67,3 +67,7 @@ Ghostty의 한국어 메뉴는 Ghostty가 제공한 번역 파일과 `language =
 11월 12일에 추가한 Ghostty 1.2.3 한글 입력용 구성은 [별도 실행 구성](../ghostty/1.2.3/README.md)에 있습니다. 시스템 Ghostty 1.3.1을 교체한 것이 아닙니다. [실행기와 아이콘 템플릿](launchers/), [입력 조사 자료](../ghostty/ime-history/README.md), [휴대폰 SSH 설정 예시](remote/README.md), [Codex·Claude 협업 절차](AGENT-WORKFLOW.md)를 함께 보관합니다.
 
 설치 전후 상태와 중간 실패 로그는 [작업 기록 목록](history/README.md)에서 구분합니다. 실제 실행 세션·계정 인증·SSH 키·전체 사용자 로그·대용량 도구 캐시는 공개 저장소의 대상에서 제외합니다.
+
+## 프로젝트별 환경
+
+[MSI 타닥 환경](environments/tadak.md)에 독립 작업본, Codex·Claude 두 창, 이력 연결, pstack·REA 경로와 최초 설정 대기 상태를 기록했습니다.

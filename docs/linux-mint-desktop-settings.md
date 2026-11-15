@@ -80,3 +80,5 @@ Herdr 패치와 해시는 [Herdr 기록](../herdr/README.md), 새 장치의 빌�
 - [Herdr 설치 기록과 검증 범위](../herdr/manifest.json)
 
 Herdr 실행 아이콘은 기본 터미널용, GNOME Terminal 전용, Ghostty 1.2.3 입력용으로 나뉩니다. 실제 경로를 일반화한 템플릿은 [실행기 폴더](../herdr/launchers/)에 있습니다.
+
+타닥의 MSI 작업 폴더와 두 에이전트 구성은 [타닥 Herdr 환경](../herdr/environments/tadak.md)에 별도로 기록했습니다. 자료 이관 완료와 실제 대화 재개 대기를 구분합니다.
